@@ -1,4 +1,4 @@
-export const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+export const baseURL = import.meta.env.VITE_API_URL || "https://restorent-management-services-premium-xj81-joeyphkqt.vercel.app";
 
 const SummaryApi = {
     // SuperAdmin
@@ -9,6 +9,58 @@ const SummaryApi = {
     deleteSaasPlan: (id) => ({ url: baseURL + `/api/saas-plan/delete-saas-plan/${id}`, method: "delete" }),
     createRestaurant: { url: baseURL + "/api/restaurant/create", method: "post" },
     getAllRestaurants: { url: baseURL + "/api/restaurant/all", method: "get" },
+
+
+    //app
+    
+        // Restaurant Auth & Subscription
+        adminLogin: { url: baseURL + "/api/admin/login", method: "post" },
+        purchasePlan: { url: baseURL + "/api/admin/purchase-plan", method: "post" },
+        getMe: { url: baseURL + "/api/admin/me", method: "get" },
+        checkPlanAccess: { url: baseURL + "/api/admin/plan-access-check", method: "get" },
+    
+    
+    
+        // Menu / Products
+        getProducts:    { url: baseURL + "/api/products",        method: "get"  },
+        addProduct:     { url: baseURL + "/api/products/add",   method: "post" },
+        updateProduct: (id) => ({ url: baseURL + `/api/products/${id}`, method: "put" }),
+        deleteProduct: (id) => ({ url: baseURL + `/api/products/${id}`, method: "delete" }),
+    
+        // Orders
+        createOrder:    { url: baseURL + "/api/orders",         method: "post" },
+        getOrders:      { url: baseURL + "/api/orders",         method: "get"  },
+        updateOrderStatus: (id) => ({ url: baseURL + `/api/orders/${id}`, method: "put" }),
+    
+    
+    
+        // Tables
+        getTables:      { url: baseURL + "/api/tables",         method: "get"  },
+        addTable:       { url: baseURL + "/api/tables",         method: "post" },
+        updateTable: (number) => ({ url: baseURL + `/api/tables/${number}`, method: "put" }),
+        deleteTable: (number) => ({ url: baseURL + `/api/tables/${number}`, method: "delete" }),
+        
+    
+    
+    
+    
+        // Ingredients
+        getIngredients: { url: baseURL + "/api/ingredients", method: "get" },
+        addIngredient:  { url: baseURL + "/api/ingredients/add", method: "post" },
+        updateIngredient: (id) => ({ url: baseURL + `/api/ingredients/${id}`, method: "put" }),
+        deleteIngredient: (id) => ({ url: baseURL + `/api/ingredients/${id}`, method: "delete" }),
+    
+    
+    
+    
+        // Settings
+        getSettings:    { url: baseURL + "/api/settings", method: "get" },
+        updateSettings: { url: baseURL + "/api/settings", method: "put" },
+    
+        // Webhooks (Simulation)
+        swiggyWebhook:  { url: baseURL + "/api/webhooks/swiggy", method: "post" },
+        zomatoWebhook:  { url: baseURL + "/api/webhooks/zomato", method: "post" },
+        
     
 }
 

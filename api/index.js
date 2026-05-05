@@ -19,34 +19,48 @@ import settingRoutes from './src/routes/app/settingRoutes.js';
 import webhookRoutes from './src/routes/app/webhook.routes.js';
 
 dotenv.config();
-
-connectDB();
+const isVercel = !!process.env.VERCEL;
 
 const app = express();
 app.use(cors({
-  origin: ["http://localhost:8080", "http://localhost:5173", "https://restorent-management-eight.vercel.app"],
+  origin: ["https://restorent-management-eight.vercel.app", "http://localhost:5173", "https://restorent-management-services-premi.vercel.app"],
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(morgan('dev'));
 
-const httpServer = http.createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: ["http://localhost:8080","https://restorent-management-eight.vercel.app"],
-    methods: ["GET", "POST"]
-  }
-});
-
-app.set('socketio', io);
-
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
+if (!isVercel) {
+  const httpServer = http.createServer(app);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: ["https://restorent-management-eight.vercel.app", "https://restorent-management-services-premi.vercel.app"],
+      methods: ["GET", "POST"]
+    }
   });
-});
+
+  app.set('socketio', io);
+
+  io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+    socket.on('disconnect', () => {
+      console.log('Client disconnected');
+    });
+  });
+
+  const PORT = process.env.PORT || 5000;
+  const server = httpServer.listen(PORT, () => {
+    console.log(`Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      process.exit(1);
+    } else {
+      throw err;
+    }
+  });
+}
 
 app.use('/api/super-admin', superAdminRouter);
 app.use('/api/saas-plan', SaasPlanRouter);
@@ -64,15 +78,9 @@ app.use('/api/webhooks', webhookRoutes);
 app.get('/', (req, res) => {
   res.send('Restaurant Management API is running');
 });
-const PORT = process.env.PORT || 5000;
-const server = httpServer.listen(PORT, () => {
-  console.log(`Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+
+connectDB().catch((error) => {
+  console.error('Database connection failed:', error.message);
 });
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    process.exit(1);
-  } else {
-    throw err;
-  }
-});
+export default app;
