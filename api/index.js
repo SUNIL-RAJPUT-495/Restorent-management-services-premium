@@ -22,10 +22,30 @@ dotenv.config();
 const isVercel = !!process.env.VERCEL;
 
 const app = express();
-app.use(cors({
-  origin: ["https://restorent-management-eight.vercel.app", "http://localhost:5173", "https://restorent-management-services-premi.vercel.app"],
-  credentials: true
-}));
+const allowedOrigins = new Set([
+  "http://localhost:5173",
+  "https://restorent-management-eight.vercel.app",
+  "https://restorent-management-services-premi.vercel.app",
+  "https://restorent-management-services-premium.vercel.app",
+]);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow server-to-server and non-browser requests.
+      if (!origin) return callback(null, true);
+
+      // Allow explicit known origins and related Vercel subdomains.
+      const isAllowed =
+        allowedOrigins.has(origin) ||
+        /^https:\/\/restorent-management-services-[a-z0-9-]+\.vercel\.app$/i.test(origin);
+
+      if (isAllowed) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(morgan('dev'));
