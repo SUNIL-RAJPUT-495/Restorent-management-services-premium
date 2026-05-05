@@ -10,6 +10,7 @@ import { PricingPage } from './pages/marketing/PricingPage'
 import { Blogs } from './pages/marketing/Blogs'
 import { ContactPage } from './pages/marketing/ContactPage'
 import { SuperAdminLogin } from './pages/auth/SuperAdminLogin'
+import LeadPopup from './components/landing/LeadPopup'
 
 // Super Admin Components
 import SuperAdminLayout from './layouts/SuperAdminLayout'
@@ -25,6 +26,25 @@ export const App = () => {
   const location = useLocation()
   const isAuthRoute = location.pathname.includes('/login')
   const isSuperAdminRoute = location.pathname.startsWith('/super-admin')
+  const [showLeadPopup, setShowLeadPopup] = React.useState(false)
+  const leadSubmittedKey = 'rw_lead_submitted'
+
+  React.useEffect(() => {
+    if (isAuthRoute || isSuperAdminRoute) return
+    if (localStorage.getItem(leadSubmittedKey) === 'true') return
+
+    setShowLeadPopup(false)
+    const timer = setTimeout(() => {
+      setShowLeadPopup(true)
+    }, 3500)
+
+    return () => clearTimeout(timer)
+  }, [location.pathname, isAuthRoute, isSuperAdminRoute])
+
+  const handleLeadSubmitted = () => {
+    localStorage.setItem(leadSubmittedKey, 'true')
+    setShowLeadPopup(false)
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans selection:bg-orange-500 selection:text-white">
@@ -57,6 +77,11 @@ export const App = () => {
         </Routes>
       </main>
       {(!isAuthRoute && !isSuperAdminRoute) && <Footer />}
+      <LeadPopup
+        open={showLeadPopup}
+        onClose={() => setShowLeadPopup(false)}
+        onSubmitted={handleLeadSubmitted}
+      />
     </div>
   )
 }

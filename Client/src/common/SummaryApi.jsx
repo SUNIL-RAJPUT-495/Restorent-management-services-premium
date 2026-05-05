@@ -45,6 +45,9 @@ const SummaryApi = {
     // Settings
     getSettings:    { url: baseURL + "/api/settings", method: "get" },
     updateSettings: { url: baseURL + "/api/settings", method: "put" },
+
+    // Lead Popup
+    createLead: { url: baseURL + "/api/leads", method: "post" },
     
 }
 
