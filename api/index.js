@@ -35,7 +35,7 @@ if (!isVercel) {
   const io = new Server(httpServer, {
     cors: {
       origin: ["https://restorent-management-eight.vercel.app", "https://restorent-management-services-premi.vercel.app"],
-      methods: ["GET", "POST"]
+      methods: ["GET", "POST", "PUT", "DELETE"]
     }
   });
 
