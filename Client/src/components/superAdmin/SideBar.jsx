@@ -20,9 +20,13 @@ const SideBar = ({ onClose }) => {
     { name: 'Restaurants', path: '/super-admin/restaurants', icon: Users },
     { name: 'Plans', path: '/super-admin/plans', icon: CreditCard },
     { name: 'Blogs', path: '/super-admin/blogs', icon: FileText },
+    {name: 'leads', path: '/super-admin/leads', icon: Users},
+    {name: 'chat-bot', path: '/super-admin/chat-bot', icon: MessageSquare},
     { name: 'Settings', path: '/super-admin/settings', icon: Settings },
   ];
 
+
+  
   return (
     <div className="w-64 h-full bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 relative">
       <div className="p-6 flex items-center justify-between border-b border-slate-800">
