@@ -18,6 +18,7 @@ import Dashboard from './pages/super-admin/Dashboard'
 import PlanManage from './pages/super-admin/PlanManage'
 import BlogManage from './pages/super-admin/BlogManage'
 import TenantManage from './pages/super-admin/TenantManage'
+import LeadManage from './pages/super-admin/LeadManage'
 import SuperAdminProtectedRoute from './components/superAdmin/SuperAdminProtectedRoute'
 import RegisterRestaurant from './pages/marketing/RegisterRestaurant'
 
@@ -73,6 +74,7 @@ export const App = () => {
             <Route path="plans" element={<PlanManage />} />
             <Route path="blogs" element={<BlogManage />} />
             <Route path="restaurants" element={<TenantManage />} />
+            <Route path="leads" element={<LeadManage />} />
           </Route>
         </Routes>
       </main>

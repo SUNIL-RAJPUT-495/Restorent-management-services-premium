@@ -9,6 +9,7 @@ const SummaryApi = {
     deleteSaasPlan: (id) => ({ url: baseURL + `/api/saas-plan/delete-saas-plan/${id}`, method: "delete" }),
     createRestaurant: { url: baseURL + "/api/restaurant/create", method: "post" },
     getAllRestaurants: { url: baseURL + "/api/restaurant/all", method: "get" },
+    getAllLeads: { url: baseURL + "/api/restaurant/leads", method: "get" },
 
 
     //app
