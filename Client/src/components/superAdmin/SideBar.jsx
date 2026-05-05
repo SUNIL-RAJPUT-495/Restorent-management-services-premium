@@ -9,6 +9,7 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
+  MessageSquare,
   X
 } from 'lucide-react';
 
