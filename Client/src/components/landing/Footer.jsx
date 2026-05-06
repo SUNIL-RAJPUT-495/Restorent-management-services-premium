@@ -37,23 +37,26 @@ export const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white font-semibold mb-6">Company</h4>
+            <h4 className="text-white font-semibold mb-6">RESTOSOFTIN</h4>
             <ul className="space-y-4 text-sm">
+              <li><a href="#" className="hover:text-orange-500 transition-colors">Home</a></li>
               <li><a href="#" className="hover:text-orange-500 transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-orange-500 transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-orange-500 transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-orange-500 transition-colors">Terms of Service</a></li>
+              <li><a href="#" className="hover:text-orange-500 transition-colors">Features</a></li>
+              <li><a href="#" className="hover:text-orange-500 transition-colors">Pricing</a></li>
+              <li><a href="#" className="hover:text-orange-500 transition-colors">Blog</a></li>
+              <li><a href="#" className="hover:text-orange-500 transition-colors">Contact Us</a></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-white font-semibold mb-6">Contact Us</h4>
             <ul className="space-y-4 text-sm">
+              <li>117/118, Karma Patel Marg, Sector 72, Agarwal Farm, Sector 9, Mansarovar, Jaipur, Rajasthan 302020</li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-slate-500" />
                 <a href="mailto:support@restrosuite.com" className="hover:text-white transition-colors">support@restrosuite.com</a>
               </li>
-              <li>1-800-RESTRO (737876)</li>
+              <li>+91 93517 64755</li>
             </ul>
           </div>
           
@@ -61,7 +64,6 @@ export const Footer = () => {
         
         <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
           <p>&copy; {new Date().getFullYear()} RestroSuite. All rights reserved.</p>
-          <p>Made with ❤️ for restaurants.</p>
         </div>
       </div>
     </footer>

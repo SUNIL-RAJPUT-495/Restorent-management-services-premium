@@ -2,7 +2,17 @@ import Lead from "../../models/Super_Admin/Lead.js";
 
 export const createLead = async (req, res) => {
   try {
-    const { name, email, phone, message } = req.body;
+    const { 
+      name, 
+      email, 
+      phone, 
+      state, 
+      city, 
+      restaurantName, 
+      restaurantStatus, 
+      outletType, 
+      message 
+    } = req.body;
 
     if (!name || !email || !phone) {
       return res.status(400).json({
@@ -15,6 +25,11 @@ export const createLead = async (req, res) => {
       name,
       email,
       phone,
+      state,
+      city,
+      restaurantName,
+      restaurantStatus,
+      outletType,
       message: message || "",
       status: "NEW",
     });

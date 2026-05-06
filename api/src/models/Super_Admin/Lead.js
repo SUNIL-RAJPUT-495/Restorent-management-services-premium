@@ -4,6 +4,11 @@ const leadSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
   phone: { type: String, required: true },
+  state: { type: String },
+  city: { type: String },
+  restaurantName: { type: String },
+  restaurantStatus: { type: String },
+  outletType: { type: String },
   message: { type: String },
   
   // Sales pipeline track karne ke liye
