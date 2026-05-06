@@ -44,7 +44,7 @@ const LeadManage = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Leads</h1>
-        <p className="text-sm text-slate-500">Website popup se aaye hue leads yahan dikhte hain.</p>
+        <p className="text-sm text-slate-500">leads from website popup will be displayed here</p>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white">

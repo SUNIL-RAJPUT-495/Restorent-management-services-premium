@@ -11,6 +11,12 @@ import { Blogs } from './pages/marketing/Blogs'
 import { ContactPage } from './pages/marketing/ContactPage'
 import { SuperAdminLogin } from './pages/auth/SuperAdminLogin'
 import LeadPopup from './components/landing/LeadPopup'
+import { Billing } from './pages/marketing/pos/Billing'
+import { Employee } from './pages/marketing/pos/Employee'
+import { FineDiner } from './pages/marketing/pos/FineDiner'
+import { Menu } from './pages/marketing/pos/Menu'
+import { Report } from './pages/marketing/pos/Report'
+import { Inventory } from './pages/marketing/pos/Inventory'
 
 // Super Admin Components
 import SuperAdminLayout from './layouts/SuperAdminLayout'
@@ -59,6 +65,16 @@ export const App = () => {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/pos/billing" element={<Billing />} />
+          <Route path="/pos/inventory" element={<Inventory />} />
+          <Route path="/pos/menu" element={<Menu />} />
+          <Route path="/pos/report" element={<Report />} />
+          <Route path="/pos/employee" element={<Employee />} />
+          <Route path="/pos/finediner" element={<FineDiner />} />
+
+
+
+
           <Route path="/register-plan" element={<RegisterRestaurant />} />
           
           {/* Auth Routes */}

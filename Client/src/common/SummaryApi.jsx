@@ -10,6 +10,9 @@ const SummaryApi = {
     createRestaurant: { url: baseURL + "/api/restaurant/create", method: "post" },
     getAllRestaurants: { url: baseURL + "/api/restaurant/all", method: "get" },
     getAllLeads: { url: baseURL + "/api/restaurant/leads", method: "get" },
+    createBlog: { url: baseURL + "/api/blogs/create", method: "post" },
+    getAdminBlogs: { url: baseURL + "/api/blogs/admin/all", method: "get" },
+    getPublicBlogs: { url: baseURL + "/api/blogs/public/all", method: "get" },
 
 
     //app

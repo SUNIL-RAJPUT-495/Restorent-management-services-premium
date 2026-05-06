@@ -10,6 +10,7 @@ import { Server } from "socket.io";
 import superAdminRouter from './src/routes/Super_Admin/auth.Super.js';
 import SaasPlanRouter from './src/routes/Super_Admin/createSaasPlan.js';
 import restorentRouter from './src/routes/Super_Admin/restorentRouter.js';
+import blogRouter from './src/routes/Super_Admin/blogRouter.js';
 import authRoutes from './src/routes/app/authRoutes.js';
 import productRoutes from './src/routes/app/productRoutes.js';
 import orderRoutes from './src/routes/app/orderRoutes.js';
@@ -86,6 +87,7 @@ if (!isVercel) {
 app.use('/api/super-admin', superAdminRouter);
 app.use('/api/saas-plan', SaasPlanRouter);
 app.use('/api/restaurant', restorentRouter);
+app.use('/api/blogs', blogRouter);
 
 
 app.use('/api/admin', authRoutes);
