@@ -6,13 +6,13 @@ const transactionSchema = new mongoose.Schema({
     ref: 'Restaurant', 
     required: true 
   },
-  
+
   planId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'SaaSPlan', 
     required: true 
   },
-  
+
   amountPaid: { type: Number, required: true },
   
   paymentGateway: { 
@@ -20,8 +20,7 @@ const transactionSchema = new mongoose.Schema({
     enum: ['RAZORPAY', 'STRIPE', 'OFFLINE_CASH', 'UPI', 'IMB'], 
     required: true 
   },
-  
-  // Payment gateway se mili hui original receipt ID
+
   transactionId: { type: String, required: true, unique: true }, 
   
   status: { 

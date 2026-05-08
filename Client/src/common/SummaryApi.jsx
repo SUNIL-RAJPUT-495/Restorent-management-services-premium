@@ -1,4 +1,4 @@
-export const baseURL = "http://localhost:5000";
+export const baseURL = "https://restorent-management-services-premi-three.vercel.app";
 
 const SummaryApi = {
     // SuperAdmin

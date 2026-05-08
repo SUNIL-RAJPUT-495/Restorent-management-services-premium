@@ -30,7 +30,6 @@ const allowedOrigins = new Set([
   "http://localhost:8080",
   "https://restorent-management-services-premi-fawn.vercel.app",
   "https://restorent-management-services-premi.vercel.app",
-  "https://restorent-management-services-premium.vercel.app",
 ]);
 
 app.use(
