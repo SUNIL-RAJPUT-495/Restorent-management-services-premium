@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 
 const orderSchema = new mongoose.Schema({
-
   restId: { type: mongoose.Schema.Types.ObjectId, ref: 'Restorent' },
   orderNumber: {
     type: String,
@@ -10,22 +9,25 @@ const orderSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['qsr', 'fine-dine', 'delivery', 'pickup'],
+    enum: ['qsr', 'fine-dine'],
     required: true,
-  },
-  source: {
-    type: String,
-    enum: ['internal', 'swiggy', 'zomato'],
-    default: 'internal',
-  },
-  externalId: {
-    type: String,
   },
   tableNumber: {
     type: String,
   },
-  customer: {
+  customerName: {
     type: String,
+  },
+  customerPhone: {
+    type: String,
+  },
+  customerEmail: {
+    type: String,
+  },
+  source: {
+    type: String,
+    enum: ['pos', 'self-order'],
+    default: 'pos'
   },
   items: [{
     productId: {
@@ -48,6 +50,26 @@ const orderSchema = new mongoose.Schema({
   paymentMethod: {
     type: String,
     enum: ['cash', 'card', 'online'],
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'completed', 'failed'],
+    default: 'pending'
+  },
+  razorpayOrderId: {
+    type: String,
+  },
+  razorpayPaymentId: {
+    type: String,
+  },
+  razorpaySignature: {
+    type: String,
+  },
+  imbOrderId: {
+    type: String,
+  },
+  imbPaymentId: {
+    type: String,
   },
 }, {
   timestamps: true,

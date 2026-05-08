@@ -18,8 +18,9 @@ import {
   QrCode,
   ShieldAlert
 } from 'lucide-react';
-import SummaryApi from '../../common/SummaryApi';
+import SummaryApi, { baseURL } from '../../common/SummaryApi';
 import axiosSuperAdminApi from '../../utils/axiosSuperAdmin';
+import axios from 'axios';
 
 const RegisterRestaurant = () => {
   const location = useLocation();
@@ -36,12 +37,6 @@ const RegisterRestaurant = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [isPaymentStep, setIsPaymentStep] = useState(false);
-
-  const handleFinalizePayment = () => {
-    alert("Payment successful! Redirecting to login...");
-    window.location.href = "https://restorent-management-eight.vercel.app/admin/login";
-  };
 
   if (!selectedPlan) {
     return (
@@ -73,7 +68,7 @@ const RegisterRestaurant = () => {
       ...formData,
       subscription: {
         plan: selectedPlan.name,
-        status: selectedPlan.price === 0 ? 'trial' : 'active',
+        status: selectedPlan.price === 0 ? 'trial' : 'pending',
         expiresAt: expiryDate
       }
     };
@@ -86,8 +81,23 @@ const RegisterRestaurant = () => {
       });
 
       if (res.data.success) {
-        alert(res.data.message || "Registration data saved! Please complete the payment.");
-        setIsPaymentStep(true);
+        alert(res.data.message || "Registration data saved! Redirecting to secure payment gateway...");
+        
+        const subPayload = {
+            restaurantId: res.data.restaurant._id,
+            planId: selectedPlan._id,
+            totalAmount: selectedPlan.price,
+            ownerName: formData.ownerName,
+            phone: formData.phone,
+            email: formData.email,
+        };
+        const imbRes = await axios.post(`${baseURL}/api/restaurant/payment/imb/create`, subPayload);
+        
+        if (imbRes.data.success && imbRes.data.payment_url) {
+            window.location.href = imbRes.data.payment_url;
+        } else {
+            throw new Error(imbRes.data.message || "Failed to get payment URL");
+        }
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -282,9 +292,8 @@ const RegisterRestaurant = () => {
               animate={{ opacity: 1, x: 0 }}
               className="sticky top-28 space-y-6"
             >
-              {!isPaymentStep ? (
-                /* Plan Card / Order Summary */
-                <div className="bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
+              {/* Plan Card / Order Summary */}
+              <div className="bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
                   <div className="p-8">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="p-2 bg-orange-500 rounded-lg">
@@ -337,83 +346,7 @@ const RegisterRestaurant = () => {
                     </div>
                   </div>
                 </div>
-              ) : (
-                /* Payment Gateway Card */
-                <div className="bg-white rounded-3xl border-2 border-orange-500 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
-                  <div className="bg-slate-900 p-6 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                            <CreditCard className="w-5 h-5 text-white" />
-                        </div>
-                        <h3 className="text-lg font-bold text-white tracking-tight">IBN Payment</h3>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Payable</p>
-                        <p className="text-orange-500 font-black">₹{selectedPlan.price}</p>
-                    </div>
-                  </div>
-
-                  <div className="p-6 space-y-6">
-                    <div className="space-y-4">
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Payment Method</p>
-                        
-                        {/* UPI Option */}
-                        <div className="p-4 rounded-2xl border-2 border-orange-100 bg-orange-50/30 flex items-center gap-4 cursor-pointer hover:border-orange-200 transition-all group">
-                            <div className="p-2 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                                <QrCode className="w-6 h-6 text-orange-500" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="font-bold text-slate-800">UPI / QR Code</p>
-                                <p className="text-[10px] text-slate-500">Google Pay, PhonePe, Paytm</p>
-                            </div>
-                            <div className="w-5 h-5 rounded-full border-2 border-orange-500 flex items-center justify-center">
-                                <div className="w-2.5 h-2.5 bg-orange-500 rounded-full"></div>
-                            </div>
-                        </div>
-
-                        {/* Card Option */}
-                        <div className="p-4 rounded-2xl border border-slate-200 flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-all">
-                            <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
-                                <Smartphone className="w-6 h-6 text-slate-400" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="font-bold text-slate-700">Credit / Debit Card</p>
-                                <p className="text-[10px] text-slate-500">Visa, Mastercard, RuPay</p>
-                            </div>
-                        </div>
-
-                        {/* Net Banking */}
-                        <div className="p-4 rounded-2xl border border-slate-200 flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-all">
-                            <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
-                                <Banknote className="w-6 h-6 text-slate-400" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="font-bold text-slate-700">Net Banking</p>
-                                <p className="text-[10px] text-slate-500">All Indian Banks supported</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="pt-4 space-y-4">
-                        <button 
-                            onClick={handleFinalizePayment}
-                            className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 group"
-                        >
-                            <span>PROCEED TO PAY</span>
-                            <ArrowLeft className="w-5 h-5 rotate-180 group-hover:translate-x-1 transition-transform" />
-                        </button>
-                        <div className="flex items-center justify-center gap-2 text-slate-400">
-                            <ShieldCheck className="w-4 h-4" />
-                            <span className="text-[10px] font-bold tracking-tight">SECURE 256-BIT ENCRYPTION</span>
-                        </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-slate-50 p-4 border-t border-slate-100 text-center">
-                    <p className="text-[10px] text-slate-400 font-medium">Transaction ID: IBN-8291-002</p>
-                  </div>
-                </div>
-              )}
+              {/* End of Order Summary */}
 
               {/* Security Badge */}
               <div className="bg-white rounded-2xl border border-slate-200 p-6 flex items-center gap-4 shadow-sm">

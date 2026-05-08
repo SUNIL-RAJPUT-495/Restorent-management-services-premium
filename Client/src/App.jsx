@@ -27,6 +27,7 @@ import TenantManage from './pages/super-admin/TenantManage'
 import LeadManage from './pages/super-admin/LeadManage'
 import SuperAdminProtectedRoute from './components/superAdmin/SuperAdminProtectedRoute'
 import RegisterRestaurant from './pages/marketing/RegisterRestaurant'
+import IMBPaymentGateway from './pages/marketing/IMBPaymentGateway'
 
 
 export const App = () => {
@@ -76,6 +77,7 @@ export const App = () => {
 
 
           <Route path="/register-plan" element={<RegisterRestaurant />} />
+          <Route path="/imb-payment" element={<IMBPaymentGateway />} />
           
           {/* Auth Routes */}
           <Route path="/super-admin/login" element={<SuperAdminLogin />} />

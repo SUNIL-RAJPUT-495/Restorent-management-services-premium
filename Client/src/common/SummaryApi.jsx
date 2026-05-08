@@ -1,4 +1,4 @@
-export const baseURL = import.meta.env.VITE_API_URL || "https://restorent-management-services-premi-three.vercel.app";
+export const baseURL = "http://localhost:5000";
 
 const SummaryApi = {
     // SuperAdmin

@@ -19,6 +19,7 @@ import ingredientRoutes from './src/routes/app/ingredientRoutes.js';
 import settingRoutes from './src/routes/app/settingRoutes.js';
 import webhookRoutes from './src/routes/app/webhook.routes.js';
 import leadRoutes from './src/routes/app/leadRoutes.js';
+import imbPaymentRoutes from './src/routes/app/imbPaymentRoutes.js';
 
 dotenv.config();
 const isVercel = !!process.env.VERCEL;
@@ -98,6 +99,7 @@ app.use('/api/ingredients', ingredientRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/leads', leadRoutes);
+app.use('/api/public/payment/imb', imbPaymentRoutes);
 
 app.get('/', (req, res) => {
   res.send('Restaurant Management API is running');

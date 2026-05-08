@@ -17,7 +17,7 @@ const transactionSchema = new mongoose.Schema({
   
   paymentGateway: { 
     type: String, 
-    enum: ['RAZORPAY', 'STRIPE', 'OFFLINE_CASH', 'UPI'], 
+    enum: ['RAZORPAY', 'STRIPE', 'OFFLINE_CASH', 'UPI', 'IMB'], 
     required: true 
   },
   
