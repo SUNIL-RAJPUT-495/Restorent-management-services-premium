@@ -10,7 +10,6 @@ const SummaryApi = {
     createRestaurant: { url: baseURL + "/api/restaurant/create", method: "post" },
     createSubscriptionReservation: { url: baseURL + "/api/restaurant/subscription/reserve", method: "post" },
     createSubscriptionPayment: { url: baseURL + "/api/restaurant/payment/imb/create", method: "post" },
-    retrySubscriptionPayment: { url: baseURL + "/api/restaurant/payment/imb/retry", method: "post" },
     verifySubscriptionPayment: { url: baseURL + "/api/restaurant/payment/imb/verify", method: "post" },
     getAllRestaurants: { url: baseURL + "/api/restaurant/all", method: "get" },
     getAllLeads: { url: baseURL + "/api/restaurant/leads", method: "get" },

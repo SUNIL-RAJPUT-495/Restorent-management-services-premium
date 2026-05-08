@@ -71,7 +71,7 @@ const RegisterRestaurant = () => {
           throw new Error("Reservation created but reservationId missing");
         }
 
-        alert(reserveRes.data.message || "Registration saved for 24h. Redirecting to secure payment gateway...");
+        alert(reserveRes.data.message || "Registration created. Redirecting to secure payment gateway...");
         
         const subPayload = {
             reservationId,

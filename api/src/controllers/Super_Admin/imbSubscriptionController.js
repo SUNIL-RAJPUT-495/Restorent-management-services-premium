@@ -5,9 +5,7 @@ import SaaSPlan from "../../models/Super_Admin/SaaSPlan.js";
 import SubscriptionOrder from "../../models/Super_Admin/SubscriptionOrder.js";
 import SubscriptionReservation from "../../models/Super_Admin/SubscriptionReservation.js";
 
-const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-
-const isExpired = (dateValue) => new Date(dateValue).getTime() <= Date.now();
+const TEMP_RESERVATION_MS = 30 * 60 * 1000;
 
 const computeSubscriptionExpiryDate = (plan) => {
   const expiryDate = new Date();
@@ -81,6 +79,16 @@ const createRestaurantFromReservation = async (reservation) => {
   return restaurant;
 };
 
+const cleanupFailedReservation = async (reservation) => {
+  if (!reservation) return;
+  if (reservation.status === "CONVERTED") return;
+  await SubscriptionOrder.updateMany(
+    { reservationId: reservation._id, status: "PENDING" },
+    { $set: { status: "EXPIRED" } }
+  );
+  await SubscriptionReservation.findByIdAndDelete(reservation._id);
+};
+
 export const createSubscriptionReservation = async (req, res) => {
   try {
     const { name, email, phone, address, password, ownerName, planId } = req.body;
@@ -108,14 +116,14 @@ export const createSubscriptionReservation = async (req, res) => {
       ownerName,
       passwordHash,
       planId,
-      expiresAt: new Date(Date.now() + TWENTY_FOUR_HOURS_MS),
+      expiresAt: new Date(Date.now() + TEMP_RESERVATION_MS),
       status: "PENDING_PAYMENT",
       lastPaymentStatus: "NONE",
     });
 
     return res.status(201).json({
       success: true,
-      message: "Registration reserved for 24 hours. Complete payment to activate account.",
+      message: "Registration created. Complete payment now to activate account.",
       reservation,
     });
   } catch (error) {
@@ -148,7 +156,7 @@ export const createSubscriptionPayment = async (req, res) => {
         ownerName: existingRestaurant.ownerName || "Owner",
         passwordHash: existingRestaurant.password,
         planId,
-        expiresAt: new Date(Date.now() + TWENTY_FOUR_HOURS_MS),
+        expiresAt: new Date(Date.now() + TEMP_RESERVATION_MS),
         status: "PENDING_PAYMENT",
         lastPaymentStatus: "NONE",
         convertedRestaurantId: existingRestaurant._id,
@@ -170,15 +178,6 @@ export const createSubscriptionPayment = async (req, res) => {
         success: true,
         message: "Reservation already converted",
         reservation,
-      });
-    }
-
-    if (isExpired(reservation.expiresAt)) {
-      reservation.status = "EXPIRED";
-      await reservation.save();
-      return res.status(400).json({
-        success: false,
-        message: "Reservation expired. Please register again.",
       });
     }
 
@@ -239,10 +238,6 @@ export const createSubscriptionPayment = async (req, res) => {
     console.error("IMB Subscription Payment Error Details:", error.response?.data || error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
-};
-
-export const retrySubscriptionPayment = async (req, res) => {
-  return createSubscriptionPayment(req, res);
 };
 
 /**
@@ -311,13 +306,12 @@ export const verifySubscriptionPayment = async (req, res) => {
 
     reservation.lastPaymentStatus = data.status === "CANCELLED" ? "CANCELLED" : "FAILED";
     await reservation.save();
+    await cleanupFailedReservation(reservation);
 
     return res.status(400).json({
       success: false,
       status: "failed",
-      message: "Payment failed or cancelled. Reservation remains active for 24 hours.",
-      expiresAt: reservation.expiresAt,
-      reservationId: reservation._id,
+      message: "Payment failed or cancelled. Please register again with details.",
     });
   } catch (error) {
     console.error("IMB Verify Subscription Payment Error Details:", error.response?.data || error.message);
@@ -365,6 +359,7 @@ export const imbSubscriptionWebhook = async (req, res) => {
       await order.save();
       reservation.lastPaymentStatus = data.status === "CANCELLED" ? "CANCELLED" : "FAILED";
       await reservation.save();
+      await cleanupFailedReservation(reservation);
       console.log(`❌ Subscription order ${orderId} marked as ${order.status} via Webhook!`);
     }
 
