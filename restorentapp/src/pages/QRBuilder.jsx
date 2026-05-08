@@ -6,6 +6,7 @@ import SummaryApi from "@/common/SummerAPI";
 
 const QRBuilder = () => {
   const [qrUrl, setQrUrl] = useState('');
+  const [targetUrl, setTargetUrl] = useState('');
   const [copied, setCopied] = useState(false);
 
   const { data: settings, isLoading } = useQuery({
@@ -16,13 +17,24 @@ const QRBuilder = () => {
     },
   });
 
+  const { data: profileData, isLoading: isProfileLoading } = useQuery({
+    queryKey: ["restaurant-profile"],
+    queryFn: async () => {
+      const response = await AxiosAdmin.get(SummaryApi.getMe.url);
+      return response.data;
+    },
+  });
+
   const restaurantName = settings?.restaurantName || "Restaurant";
+  const restId = profileData?.restaurant?._id;
 
   useEffect(() => {
-    const targetUrl = `${window.location.origin}/order`;
-    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}&margin=15&format=png`;
+    if (!restId) return;
+    const url = `${window.location.origin}/order/${restId}`;
+    setTargetUrl(url);
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(url)}&margin=15&format=png`;
     setQrUrl(qrImageUrl);
-  }, []);
+  }, [restId]);
 
   const handleDownload = async () => {
     if (!qrUrl) return;
@@ -42,12 +54,13 @@ const QRBuilder = () => {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/order`);
+    if (!targetUrl) return;
+    navigator.clipboard.writeText(targetUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (isLoading) return <div className="p-10 text-center font-black text-primary animate-pulse tracking-[0.2em]">GENERATING...</div>;
+  if (isLoading || isProfileLoading) return <div className="p-10 text-center font-black text-primary animate-pulse tracking-[0.2em]">GENERATING...</div>;
 
   return (
     <div className="p-4 md:p-10 flex items-center justify-center min-h-[80vh] animate-in fade-in duration-700">

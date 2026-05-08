@@ -280,6 +280,7 @@ export const verifySubscriptionPayment = async (req, res) => {
       timeout: 10000,
     });
     const data = response.data;
+    console.log("🔥 IMB Subscription Payment Status:", data);
 
     if (data.status === "SUCCESS" || data.status === "COMPLETED") {
       if (order.status !== "SUCCESS") {
