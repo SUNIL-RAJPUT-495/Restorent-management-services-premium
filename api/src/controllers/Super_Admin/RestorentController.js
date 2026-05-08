@@ -1,32 +1,13 @@
 import Restorent from "../../models/Super_Admin/Restorent.js";
-import bcrypt from "bcryptjs";
 import Lead from "../../models/Super_Admin/Lead.js";
 
 
 export const create_restaurant = async(req,res) =>{
     try {
-        const {name,email,phone,address,password,ownerName,subscription} = req.body;
-
-        if (!name || !email || !phone || !address || !password || !ownerName || !subscription) {
-            return res.status(400).json({error:"All fields are required"});
-        }
-        const existingRestaurant = await Restorent.findOne({email});
-        if(existingRestaurant){
-            return res.status(400).json({error:"Restaurant already exists"});
-        }
-        
-        const hashpassword = await bcrypt.hash(password,10)
-
-        const restaurant = await Restorent.create({
-            name,
-            email,
-            phone,
-            address,
-            password:hashpassword,
-            ownerName,
-            subscription,
-        })
-        return res.status(201).json({success:true,message:"Restaurant created successfully",restaurant});
+        return res.status(403).json({
+            success: false,
+            message: "Direct restaurant creation is disabled. Please complete plan purchase and payment first.",
+        });
     } catch (error) {
         console.log(error);
         return res.status(500).json({error:error.message});

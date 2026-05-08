@@ -33,7 +33,7 @@ export const purchasePlanAndCreateRestaurant = async (req, res) => {
       paymentGateway,
       amountPaid,
       transactionId,
-      paymentStatus = "SUCCESS",
+      paymentStatus,
     } = req.body;
 
     if (!name || !ownerName || !email || !phone || !address || !password || !planId) {
@@ -50,9 +50,16 @@ export const purchasePlanAndCreateRestaurant = async (req, res) => {
       return res.status(404).json({ success: false, message: "Selected plan is not available" });
     }
 
+    const normalizedPaymentStatus = String(paymentStatus || "").toUpperCase();
+    if (!transactionId || normalizedPaymentStatus !== "SUCCESS") {
+      return res.status(400).json({
+        success: false,
+        message: "Payment must be successful before registration",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const isPaymentSuccess = paymentStatus === "SUCCESS";
-    const expiresAt = isPaymentSuccess ? getExpiryDate(plan.durationValue, plan.durationUnit) : null;
+    const expiresAt = getExpiryDate(plan.durationValue, plan.durationUnit);
 
     const restaurant = await Restorent.create({
       name,
@@ -63,21 +70,19 @@ export const purchasePlanAndCreateRestaurant = async (req, res) => {
       password: hashedPassword,
       subscription: {
         plan: plan.name,
-        status: isPaymentSuccess ? "ACTIVE" : "PENDING",
+        status: "ACTIVE",
         expiresAt,
       },
     });
 
-    if (transactionId) {
-      await Transaction.create({
-        restaurantId: restaurant._id,
-        planId: plan._id,
-        amountPaid: amountPaid ?? plan.price,
-        paymentGateway: paymentGateway || "UPI",
-        transactionId,
-        status: paymentStatus,
-      });
-    }
+    await Transaction.create({
+      restaurantId: restaurant._id,
+      planId: plan._id,
+      amountPaid: amountPaid ?? plan.price,
+      paymentGateway: paymentGateway || "UPI",
+      transactionId,
+      status: normalizedPaymentStatus,
+    });
 
     return res.status(201).json({
       success: true,
@@ -111,6 +116,37 @@ export const loginRestaurant = async (req, res) => {
     const isMatch = await bcrypt.compare(password, restaurant.password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: "Invalid email or password" });
+    }
+
+    const hasActiveSubscription =
+      restaurant.subscription &&
+      String(restaurant.subscription.status || "").toUpperCase() === "ACTIVE";
+    if (!hasActiveSubscription) {
+      return res.status(403).json({
+        success: false,
+        message: "No active plan found. Please purchase a plan to login.",
+      });
+    }
+
+    const isExpired =
+      restaurant.subscription.expiresAt &&
+      new Date(restaurant.subscription.expiresAt) < new Date();
+    if (isExpired) {
+      return res.status(403).json({
+        success: false,
+        message: "Your plan has expired. Please renew to continue.",
+      });
+    }
+
+    const successfulPayment = await Transaction.findOne({
+      restaurantId: restaurant._id,
+      status: "SUCCESS",
+    });
+    if (!successfulPayment) {
+      return res.status(403).json({
+        success: false,
+        message: "Payment verification failed. Please complete payment to login.",
+      });
     }
 
     return res.status(200).json({
