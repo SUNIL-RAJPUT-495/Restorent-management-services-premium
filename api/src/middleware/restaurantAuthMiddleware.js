@@ -31,7 +31,7 @@ export const requireActivePlanAndPayment = async (req, res, next) => {
       return res.status(401).json({ success: false, message: "Restaurant context missing" });
     }
 
-    if (!restaurant.subscription || restaurant.subscription.status !== "ACTIVE") {
+    if (!restaurant.subscription || restaurant.subscription.status.toUpperCase() !== "ACTIVE") {
       return res.status(403).json({ success: false, message: "Active plan is required" });
     }
 

@@ -4,12 +4,14 @@ import { useQRContext } from './QRContext';
 import axios from 'axios';
 import { baseURL } from '../../common/SummerAPI';
 import { toast } from 'sonner';
+import { useParams } from 'react-router-dom';
 
 const QRPayment = () => {
     const { 
         selectedTable, cartCount, cartTotal, paymentMethod, setPaymentMethod, 
         cartItems, customerInfo, setOrderConfirmed, setStep, restaurantInfo, resetFlow
     } = useQRContext();
+    const { restId } = useParams();
 
     const handlePlaceOrder = async () => {
         const toastId = toast.loading("Processing your order...");
@@ -31,7 +33,7 @@ const QRPayment = () => {
 
             if (paymentMethod === 'cash') {
                 const payload = { ...orderPayload, paymentMethod: 'cash' };
-                const res = await axios.post(`${baseURL}/api/public/order`, payload);
+                const res = await axios.post(`${baseURL}/api/public/${restId}/order`, payload);
                 setOrderConfirmed(res.data);
                 localStorage.setItem('qr_last_order', JSON.stringify(res.data));
                 // Clear cart after placing order
@@ -40,7 +42,7 @@ const QRPayment = () => {
                 setStep(5);
             } else if (paymentMethod === 'online') {
                 toast.loading("Redirecting to secure payment...", { id: toastId });
-                const imbRes = await axios.post(`${baseURL}/api/public/payment/imb/create`, orderPayload);
+                const imbRes = await axios.post(`${baseURL}/api/public/${restId}/payment/imb/create`, orderPayload);
                 
                 if (imbRes.data.success && imbRes.data.payment_url) {
                     toast.success("Payment gateway ready!", { id: toastId });

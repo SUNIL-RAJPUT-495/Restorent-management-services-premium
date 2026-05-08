@@ -13,7 +13,7 @@ export const useQRContext = () => useContext(QRContext);
 export const QRProvider = ({ children }) => {
     const [searchParams] = useSearchParams();
     const preSelectedTable = searchParams.get('table');
-    const { orderNumber: urlOrderNumber } = useParams();
+    const { restId, orderNumber: urlOrderNumber } = useParams();
 
     const [step, setStep] = useState(() => {
         const savedStep = localStorage.getItem('qr_current_step');
@@ -50,7 +50,7 @@ export const QRProvider = ({ children }) => {
     const { data: menu = [], isLoading: isMenuLoading } = useQuery({
         queryKey: ['publicMenu'],
         queryFn: async () => {
-            const res = await axios.get(`${baseURL}/api/public/menu`);
+            const res = await axios.get(`${baseURL}/api/public/${restId}/menu`);
             return Array.isArray(res.data) ? res.data : (res.data?.items || []);
         },
         staleTime: 5 * 60 * 1000,
@@ -59,7 +59,7 @@ export const QRProvider = ({ children }) => {
     const { data: tables = [], isLoading: isTablesLoading } = useQuery({
         queryKey: ['publicTables'],
         queryFn: async () => {
-            const res = await axios.get(`${baseURL}/api/public/tables`);
+            const res = await axios.get(`${baseURL}/api/public/${restId}/tables`);
             return Array.isArray(res.data) ? res.data : [];
         },
         staleTime: 5 * 60 * 1000,
@@ -69,7 +69,7 @@ export const QRProvider = ({ children }) => {
         queryKey: ['publicInfo'],
         queryFn: async () => {
             try {
-                const res = await axios.get(`${baseURL}/api/public/info`);
+                const res = await axios.get(`${baseURL}/api/public/${restId}/info`);
                 return res.data;
             } catch {
                 return { restaurantName: "Restaurant" };
@@ -87,7 +87,7 @@ export const QRProvider = ({ children }) => {
                 setIsVerifying(true);
                 const vToastId = toast.loading("Verifying payment...");
                 try {
-                    const verifyRes = await axios.post(`${baseURL}/api/public/payment/imb/verify`, { orderNumber: urlOrderNumber });
+                    const verifyRes = await axios.post(`${baseURL}/api/public/${restId}/payment/imb/verify`, { orderNumber: urlOrderNumber });
                     if (verifyRes.data.success && verifyRes.data.order) {
                         setOrderConfirmed(verifyRes.data.order);
                         setStep(5);

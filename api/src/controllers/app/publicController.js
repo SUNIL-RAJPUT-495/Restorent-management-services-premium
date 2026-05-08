@@ -1,8 +1,8 @@
-import Product from '../models/Product.js';
-import Table from '../models/Table.js';
-import Order from '../models/Order.js';
-import Setting from '../models/Setting.js';
-import Feedback from '../models/Feedback.js';
+import Product from '../../models/App_Restaurant/Product.js';
+import Table from '../../models/App_Restaurant/Table.js';
+import Order from '../../models/App_Restaurant/Order.js';
+import Setting from '../../models/App_Restaurant/Setting.js';
+import Feedback from '../../models/App_Restaurant/Feedback.js';
 import crypto from 'crypto';
 import Razorpay from 'razorpay';
 import axios from 'axios';
@@ -22,7 +22,8 @@ const razorpay = new Razorpay({
  */
 export const getRestaurantInfo = async (req, res) => {
   try {
-    const settings = await Setting.findOne({}); // Fetch the only settings available
+    const { restId } = req.params;
+    const settings = await Setting.findOne({ restId }); // Fetch the restaurant settings
     if (!settings) return res.status(404).json({ message: "Restaurant not found" });
     
     res.json({
@@ -44,7 +45,8 @@ export const getRestaurantInfo = async (req, res) => {
  */
 export const getMenu = async (req, res) => {
   try {
-    const products = await Product.find({ available: true });
+    const { restId } = req.params;
+    const products = await Product.find({ restId, available: true });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -56,7 +58,8 @@ export const getMenu = async (req, res) => {
  */
 export const getTables = async (req, res) => {
   try {
-    const tables = await Table.find({});
+    const { restId } = req.params;
+    const tables = await Table.find({ restId });
     res.json(tables);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -68,12 +71,14 @@ export const getTables = async (req, res) => {
  */
 export const placeOrder = async (req, res) => {
   try {
+    const { restId } = req.params;
     const { items, type, tableNumber, totalAmount, paymentMethod, guests, customerName, customerPhone, customerEmail } = req.body;
 
-    const orderCount = await Order.countDocuments();
+    const orderCount = await Order.countDocuments({ restId });
     const orderNumber = `ORD-${Date.now().toString().slice(-6)}-${orderCount + 1}`;
 
     const order = new Order({
+      restId,
       orderNumber,
       items,
       type,
@@ -92,7 +97,7 @@ export const placeOrder = async (req, res) => {
     // Mark table as occupied
     if (tableNumber) {
       await Table.findOneAndUpdate(
-        { number: tableNumber },
+        { number: tableNumber, restId },
         { 
           status: 'occupied',
           $set: { guests: guests || 1 },
@@ -138,6 +143,7 @@ export const createRazorpayOrder = async (req, res) => {
  */
 export const verifyRazorpayPayment = async (req, res) => {
   try {
+    const { restId } = req.params;
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
@@ -150,7 +156,7 @@ export const verifyRazorpayPayment = async (req, res) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-      const order = await Order.findById(orderId);
+      const order = await Order.findOne({ _id: orderId, restId });
       if (order) {
         order.paymentStatus = 'completed';
         order.razorpayOrderId = razorpay_order_id;
@@ -177,12 +183,14 @@ export const verifyRazorpayPayment = async (req, res) => {
  */
 export const createImbOrder = async (req, res) => {
   try {
+    const { restId } = req.params;
     const { items, type, tableNumber, totalAmount, guests, customerName, customerPhone, customerEmail } = req.body;
-
-    const orderCount = await Order.countDocuments();
+    
+    const orderCount = await Order.countDocuments({ restId });
     const orderNumber = `ORD-${Date.now().toString().slice(-6)}-${orderCount + 1}`;
 
     const order = new Order({
+      restId,
       orderNumber,
       items,
       type,
@@ -201,7 +209,7 @@ export const createImbOrder = async (req, res) => {
     // Mark table as occupied
     if (tableNumber) {
       await Table.findOneAndUpdate(
-        { number: tableNumber },
+        { number: tableNumber, restId },
         { 
           status: 'occupied',
           $set: { guests: guests || 1 },
@@ -251,6 +259,7 @@ export const createImbOrder = async (req, res) => {
  */
 export const verifyImbPayment = async (req, res) => {
   try {
+    const { restId } = req.params;
     const { orderNumber } = req.body;
 
     if (!orderNumber) {
@@ -263,7 +272,7 @@ export const verifyImbPayment = async (req, res) => {
       return res.status(503).json({ message: "Payment verification service not configured. Please contact support." });
     }
 
-    const order = await Order.findOne({ orderNumber });
+    const order = await Order.findOne({ orderNumber, restId });
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -353,9 +362,11 @@ export const imbWebhook = async (req, res) => {
  */
 export const submitFeedback = async (req, res) => {
   try {
+    const { restId } = req.params;
     const { orderNumber, rating, comment, customerName, customerPhone } = req.body;
     
     const feedback = new Feedback({
+      restId,
       orderNumber,
       rating,
       comment,

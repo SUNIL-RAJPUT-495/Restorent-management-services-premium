@@ -2,7 +2,7 @@ import Table from '../../models/App_Restaurant/Table.js';
 
 export const getTables = async (req, res) => {
   try {
-    const tables = await Table.find({});
+    const tables = await Table.find({ restId: req.restaurant._id });
     res.json(tables);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,7 +11,7 @@ export const getTables = async (req, res) => {
 
 export const updateTableStatus = async (req, res) => {
   try {
-    const table = await Table.findOne({ number: req.params.number });
+    const table = await Table.findOne({ number: req.params.number, restId: req.restaurant._id });
     if (table) {
       if (req.body.number) table.number = req.body.number;
       if (req.body.capacity) table.capacity = req.body.capacity;
@@ -35,7 +35,8 @@ export const updateTableStatus = async (req, res) => {
 
 export const addTable = async (req, res) => {
   try {
-    const table = new Table(req.body);
+    const tableData = { ...req.body, restId: req.restaurant._id };
+    const table = new Table(tableData);
     const createdTable = await table.save();
     res.status(201).json(createdTable);
   } catch (error) {
@@ -45,7 +46,7 @@ export const addTable = async (req, res) => {
 
 export const deleteTable = async (req, res) => {
   try {
-    const result = await Table.findOneAndDelete({ number: req.params.number });
+    const result = await Table.findOneAndDelete({ number: req.params.number, restId: req.restaurant._id });
     if (result) {
       res.json({ message: 'Table removed' });
     } else {

@@ -19,7 +19,7 @@ import ingredientRoutes from './src/routes/app/ingredientRoutes.js';
 import settingRoutes from './src/routes/app/settingRoutes.js';
 import webhookRoutes from './src/routes/app/webhook.routes.js';
 import leadRoutes from './src/routes/app/leadRoutes.js';
-import imbPaymentRoutes from './src/routes/app/imbPaymentRoutes.js';
+import publicRoutes from './src/routes/app/publicRoutes.js';
 
 dotenv.config();
 const isVercel = !!process.env.VERCEL;
@@ -27,7 +27,8 @@ const isVercel = !!process.env.VERCEL;
 const app = express();
 const allowedOrigins = new Set([
   "http://localhost:5173",
-  "https://restorent-management-eight.vercel.app",
+  "http://localhost:8080",
+  "https://restorent-management-services-premi-fawn.vercel.app",
   "https://restorent-management-services-premi.vercel.app",
   "https://restorent-management-services-premium.vercel.app",
 ]);
@@ -99,7 +100,7 @@ app.use('/api/ingredients', ingredientRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/leads', leadRoutes);
-app.use('/api/public/payment/imb', imbPaymentRoutes);
+app.use('/api/public/:restId', publicRoutes);
 
 app.get('/', (req, res) => {
   res.send('Restaurant Management API is running');

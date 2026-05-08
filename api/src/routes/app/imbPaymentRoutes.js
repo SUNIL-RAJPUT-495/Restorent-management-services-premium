@@ -1,5 +1,5 @@
 import express from 'express';
-import { createImbOrder, verifyImbPayment, imbWebhook } from '../../controllers/app/imbPaymentController.js';
+import { createImbOrder, verifyImbPayment, imbWebhook } from '../../controllers/app/publicController.js';
 
 const router = express.Router();
 

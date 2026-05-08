@@ -3,11 +3,11 @@ import Setting from '../../models/App_Restaurant/Setting.js';
 // GET /api/settings — fetch the one-and-only settings document
 export const getSettings = async (req, res) => {
   try {
-    let settings = await Setting.findOne({});
+    let settings = await Setting.findOne({ restId: req.restaurant._id });
     
     // If no settings, create them
     if (!settings) {
-      settings = new Setting({});
+      settings = new Setting({ restId: req.restaurant._id });
       await settings.save();
     }
     
@@ -20,9 +20,9 @@ export const getSettings = async (req, res) => {
 // PUT /api/settings — update the settings document
 export const updateSettings = async (req, res) => {
   try {
-    let settings = await Setting.findOne({});
+    let settings = await Setting.findOne({ restId: req.restaurant._id });
     if (!settings) {
-      settings = new Setting(req.body);
+      settings = new Setting({ ...req.body, restId: req.restaurant._id });
     } else {
       Object.assign(settings, req.body);
     }

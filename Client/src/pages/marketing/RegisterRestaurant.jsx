@@ -18,7 +18,7 @@ import {
   QrCode,
   ShieldAlert
 } from 'lucide-react';
-import SummaryApi, { baseURL } from '../../common/SummaryApi';
+import SummaryApi from '../../common/SummaryApi';
 import axiosSuperAdminApi from '../../utils/axiosSuperAdmin';
 import axios from 'axios';
 
@@ -55,43 +55,28 @@ const RegisterRestaurant = () => {
     e.preventDefault();
     setLoading(true);
 
-    const expiryDate = new Date();
-    if (selectedPlan.durationUnit === 'days') {
-      expiryDate.setDate(expiryDate.getDate() + selectedPlan.durationValue);
-    } else if (selectedPlan.durationUnit === 'months') {
-      expiryDate.setMonth(expiryDate.getMonth() + selectedPlan.durationValue);
-    } else if (selectedPlan.durationUnit === 'years') {
-      expiryDate.setFullYear(expiryDate.getFullYear() + selectedPlan.durationValue);
-    }
-
-    const payload = {
-      ...formData,
-      subscription: {
-        plan: selectedPlan.name,
-        status: selectedPlan.price === 0 ? 'trial' : 'pending',
-        expiresAt: expiryDate
-      }
-    };
-
     try {
-      const res = await axiosSuperAdminApi({
-        url: SummaryApi.createRestaurant.url,
-        method: SummaryApi.createRestaurant.method,
-        data: payload
+      const reserveRes = await axiosSuperAdminApi({
+        url: SummaryApi.createSubscriptionReservation.url,
+        method: SummaryApi.createSubscriptionReservation.method,
+        data: {
+          ...formData,
+          planId: selectedPlan._id,
+        }
       });
 
-      if (res.data.success) {
-        alert(res.data.message || "Registration data saved! Redirecting to secure payment gateway...");
+      if (reserveRes.data.success) {
+        const reservationId = reserveRes.data?.reservation?._id;
+        if (!reservationId) {
+          throw new Error("Reservation created but reservationId missing");
+        }
+
+        alert(reserveRes.data.message || "Registration saved for 24h. Redirecting to secure payment gateway...");
         
         const subPayload = {
-            restaurantId: res.data.restaurant._id,
-            planId: selectedPlan._id,
-            totalAmount: selectedPlan.price,
-            ownerName: formData.ownerName,
-            phone: formData.phone,
-            email: formData.email,
+            reservationId,
         };
-        const imbRes = await axios.post(`${baseURL}/api/restaurant/payment/imb/create`, subPayload);
+        const imbRes = await axios.post(SummaryApi.createSubscriptionPayment.url, subPayload);
         
         if (imbRes.data.success && imbRes.data.payment_url) {
             window.location.href = imbRes.data.payment_url;
@@ -101,7 +86,7 @@ const RegisterRestaurant = () => {
       }
     } catch (error) {
       console.error("Registration error:", error);
-      alert(error.response?.data?.error || "Registration failed");
+      alert(error.response?.data?.message || error.response?.data?.error || "Registration failed");
     } finally {
       setLoading(false);
     }

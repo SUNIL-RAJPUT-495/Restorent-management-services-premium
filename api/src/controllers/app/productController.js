@@ -2,7 +2,7 @@ import Product from '../../models/App_Restaurant/Product.js';
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    const products = await Product.find({ restId: req.restaurant._id });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,7 +11,8 @@ export const getProducts = async (req, res) => {
 
 export const addProduct = async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const productData = { ...req.body, restId: req.restaurant._id };
+    const product = new Product(productData);
     const createdProduct = await product.save();
     res.status(201).json(createdProduct);
   } catch (error) {
@@ -21,7 +22,11 @@ export const addProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const product = await Product.findOneAndUpdate(
+      { _id: req.params.id, restId: req.restaurant._id },
+      req.body,
+      { new: true }
+    );
     if (product) {
       res.json(product);
     } else {
@@ -34,7 +39,7 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findOneAndDelete({ _id: req.params.id, restId: req.restaurant._id });
     if (product) {
       res.json({ message: 'Product deleted' });
     } else {

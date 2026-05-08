@@ -1,33 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CreditCard, CheckCircle2, ShieldCheck, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import SummaryApi from '../../common/SummaryApi';
 
 const IMBPaymentGateway = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { planName, amount, transactionId } = location.state || {
-    planName: 'Unknown Plan',
+  const { planName, amount } = location.state || {
+    planName: 'Selected Plan',
     amount: 0,
-    transactionId: `IBN-${Math.floor(1000 + Math.random() * 9000)}-002`
   };
 
-  const [status, setStatus] = useState('processing'); // processing, success
+  const [status, setStatus] = useState('processing'); // processing, success, failed
+  const [message, setMessage] = useState('Processing your payment...');
+  const query = new URLSearchParams(location.search);
+  const orderId = query.get('orderId');
+  const reservationId = query.get('reservationId');
 
   useEffect(() => {
-    // Simulate payment processing
-    const timer = setTimeout(() => {
-      setStatus('success');
-      
-      // Redirect after success
-      setTimeout(() => {
-        window.location.href = "https://restorent-management-eight.vercel.app/admin/login";
-      }, 2000);
+    const verify = async () => {
+      if (!orderId) {
+        setStatus('failed');
+        setMessage('Missing order details. Please retry payment from registration page.');
+        return;
+      }
 
-    }, 3500);
+      try {
+        const response = await axios.post(SummaryApi.verifySubscriptionPayment.url, { orderId });
+        if (response.data?.success && response.data?.status === 'success') {
+          setStatus('success');
+          setMessage('Payment successful! Redirecting to restaurant login...');
+          setTimeout(() => {
+            window.location.href = "https://restorent-management-eight.vercel.app/admin/login";
+          }, 1800);
+          return;
+        }
 
-    return () => clearTimeout(timer);
-  }, []);
+        setStatus('processing');
+        setMessage('Payment status is pending. Please wait a moment...');
+      } catch (error) {
+        setStatus('failed');
+        setMessage(error.response?.data?.message || 'Payment failed or cancelled. You can retry within 24 hours.');
+      }
+    };
+
+    verify();
+  }, [orderId]);
+
+  const handleRetry = async () => {
+    if (!reservationId) {
+      setMessage('Reservation ID missing. Please register again.');
+      return;
+    }
+    try {
+      setStatus('processing');
+      setMessage('Creating a fresh payment order...');
+      const retryRes = await axios.post(SummaryApi.retrySubscriptionPayment.url, { reservationId });
+      if (retryRes.data?.success && retryRes.data?.payment_url) {
+        window.location.href = retryRes.data.payment_url;
+        return;
+      }
+      setStatus('failed');
+      setMessage(retryRes.data?.message || 'Unable to retry payment.');
+    } catch (error) {
+      setStatus('failed');
+      setMessage(error.response?.data?.message || 'Retry failed. Please register again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
@@ -53,7 +93,7 @@ const IMBPaymentGateway = () => {
             <div className="space-y-2">
               <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Paying for {planName}</p>
               <h2 className="text-5xl font-black text-slate-900">₹{amount}</h2>
-              <p className="text-xs text-slate-400 font-medium pt-2">Transaction ID: {transactionId}</p>
+              <p className="text-xs text-slate-400 font-medium pt-2">Order ID: {orderId || 'N/A'}</p>
             </div>
 
             {/* Status Animation */}
@@ -64,10 +104,10 @@ const IMBPaymentGateway = () => {
                     <Loader2 className="w-16 h-16 text-orange-500 animate-spin" />
                     <div className="absolute inset-0 bg-orange-500 blur-xl opacity-20 rounded-full animate-pulse"></div>
                   </div>
-                  <p className="text-slate-600 font-bold animate-pulse">Processing your payment...</p>
+                  <p className="text-slate-600 font-bold animate-pulse">{message}</p>
                   <p className="text-xs text-slate-400">Please do not close or refresh this window</p>
                 </div>
-              ) : (
+              ) : status === 'success' ? (
                 <motion.div 
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -79,9 +119,20 @@ const IMBPaymentGateway = () => {
                   </div>
                   <div className="space-y-1">
                     <p className="text-emerald-600 font-black text-xl">Payment Successful!</p>
-                    <p className="text-sm text-slate-500 font-medium">Redirecting to login dashboard...</p>
+                    <p className="text-sm text-slate-500 font-medium">{message}</p>
                   </div>
                 </motion.div>
+              ) : (
+                <div className="space-y-4 flex flex-col items-center">
+                  <p className="text-red-600 font-black text-xl">Payment Failed</p>
+                  <p className="text-sm text-slate-500 font-medium text-center">{message}</p>
+                  <button
+                    onClick={handleRetry}
+                    className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold"
+                  >
+                    Retry Payment (24h)
+                  </button>
+                </div>
               )}
             </div>
 

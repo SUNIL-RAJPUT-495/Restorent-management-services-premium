@@ -39,8 +39,8 @@ const App = () => (
           <Routes>
             {/* Public Route */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/order" element={<QROrderFlow />} />
-          <Route path="/order/status/:orderNumber" element={<QROrderFlow />} />
+          <Route path="/order/:restId" element={<QROrderFlow />} />
+          <Route path="/order/:restId/status/:orderNumber" element={<QROrderFlow />} />
 
         {/* Protected Routes */}
         <Route

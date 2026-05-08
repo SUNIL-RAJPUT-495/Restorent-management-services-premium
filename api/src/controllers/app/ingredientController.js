@@ -2,7 +2,7 @@ import Ingredient from '../../models/App_Restaurant/Ingredient.js';
 
 export const getIngredients = async (req, res) => {
   try {
-    const ingredients = await Ingredient.find({});
+    const ingredients = await Ingredient.find({ restId: req.restaurant._id });
     res.json(ingredients);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,7 +11,8 @@ export const getIngredients = async (req, res) => {
 
 export const addIngredient = async (req, res) => {
   try {
-    const ingredient = new Ingredient(req.body);
+    const ingredientData = { ...req.body, restId: req.restaurant._id };
+    const ingredient = new Ingredient(ingredientData);
     const createdIngredient = await ingredient.save();
     res.status(201).json(createdIngredient);
   } catch (error) {
@@ -21,7 +22,11 @@ export const addIngredient = async (req, res) => {
 
 export const updateIngredient = async (req, res) => {
   try {
-    const ingredient = await Ingredient.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const ingredient = await Ingredient.findOneAndUpdate(
+      { _id: req.params.id, restId: req.restaurant._id },
+      req.body,
+      { new: true }
+    );
     if (ingredient) {
       res.json(ingredient);
     } else {
@@ -34,7 +39,7 @@ export const updateIngredient = async (req, res) => {
 
 export const deleteIngredient = async (req, res) => {
   try {
-    const ingredient = await Ingredient.findByIdAndDelete(req.params.id);
+    const ingredient = await Ingredient.findOneAndDelete({ _id: req.params.id, restId: req.restaurant._id });
     if (ingredient) {
       res.json({ message: 'Ingredient deleted' });
     } else {

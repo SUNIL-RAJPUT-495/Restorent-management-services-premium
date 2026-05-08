@@ -1,4 +1,4 @@
-export const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "https://restorent-management-g7de.vercel.app");
+export const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "https://restorent-management-services-premi-three.vercel.app");
 
 const SummaryApi = {
    //app
@@ -10,8 +10,8 @@ const SummaryApi = {
     checkPlanAccess: { url: baseURL + "/api/admin/plan-access-check", method: "get" },
 
     // Menu / Products
-    getProducts:    { url: baseURL + "/api/products",        method: "get"  },
-    addProduct:     { url: baseURL + "/api/products/add",   method: "post" },
+    getProducts:    { url: baseURL + "/api/products", method: "get"  },
+    addProduct:     { url: baseURL + "/api/products/add", method: "post" },
     updateProduct: (id) => ({ url: baseURL + `/api/products/${id}`, method: "put" }),
     deleteProduct: (id) => ({ url: baseURL + `/api/products/${id}`, method: "delete" }),
 
