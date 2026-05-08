@@ -22,7 +22,8 @@ const computeSubscriptionExpiryDate = (plan) => {
 };
 
 const buildRedirectUrl = (orderId, reservationId) => {
-  const clientBaseUrl = process.env.CLIENT_APP_URL || "http://localhost:5173";
+  const clientBaseUrl =
+    process.env.CLIENT_APP_URL || "https://restorent-management-services-premi.vercel.app";
   const query = new URLSearchParams({
     orderId,
     reservationId: String(reservationId),

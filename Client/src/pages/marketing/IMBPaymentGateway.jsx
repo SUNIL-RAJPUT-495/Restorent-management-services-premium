@@ -5,6 +5,10 @@ import { CreditCard, CheckCircle2, ShieldCheck, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import SummaryApi from '../../common/SummaryApi';
 
+const SUCCESS_REDIRECT_URL =
+  import.meta.env.VITE_POST_PAYMENT_REDIRECT_URL ||
+  'https://restorent-management-services-premi-fawn.vercel.app/';
+
 const IMBPaymentGateway = () => {
   const location = useLocation();
   const { planName, amount } = location.state || {
@@ -32,7 +36,7 @@ const IMBPaymentGateway = () => {
           setStatus('success');
           setMessage('Payment successful! Redirecting to restaurant login...');
           setTimeout(() => {
-            window.location.href = "https://restorent-management-eight.vercel.app/admin/login";
+            window.location.href = SUCCESS_REDIRECT_URL;
           }, 1800);
           return;
         }
