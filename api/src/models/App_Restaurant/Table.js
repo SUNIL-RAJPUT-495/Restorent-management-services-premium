@@ -6,7 +6,6 @@ const tableSchema = new mongoose.Schema({
   number: {
     type: String,
     required: true,
-    unique: true,
   },
   status: {
     type: String,
@@ -28,6 +27,8 @@ const tableSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-const Table = mongoose.model('Table', tableSchema);
+tableSchema.index({ number: 1, restId: 1 }, { unique: true });
+
+const Table = mongoose.models.Table || mongoose.model('Table', tableSchema);
 
 export default Table;

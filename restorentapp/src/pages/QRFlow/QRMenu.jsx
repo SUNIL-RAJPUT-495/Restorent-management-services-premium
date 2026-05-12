@@ -131,10 +131,10 @@ const QRMenu = () => {
                             Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
                         ) : (
                             filteredMenu.map(product => (
-                                <button
+                                <div
                                     key={product._id}
                                     onClick={() => !cart[product._id] && addToCart(product)}
-                                    className="group flex flex-col items-center rounded-2xl border border-slate-100 bg-white p-3 text-center transition-all hover:-translate-y-1 hover:border-accent/30 hover:shadow-xl hover:shadow-accent/5 active:scale-95"
+                                    className="group flex flex-col items-center rounded-2xl border border-slate-100 bg-white p-3 text-center transition-all hover:-translate-y-1 hover:border-accent/30 hover:shadow-xl hover:shadow-accent/5 active:scale-95 cursor-pointer"
                                 >
                                     <div className="w-full aspect-square mb-3 rounded-xl overflow-hidden flex-shrink-0 bg-slate-50 flex items-center justify-center relative">
                                         {product.image ? (
@@ -185,7 +185,7 @@ const QRMenu = () => {
                                             </div>
                                         )}
                                     </div>
-                                </button>
+                                </div>
                             ))
                         )}
                     </div>

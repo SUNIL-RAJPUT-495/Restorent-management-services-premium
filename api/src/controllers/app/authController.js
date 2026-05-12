@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import Restorent from "../../models/Super_Admin/Restorent.js";
 import Transaction from "../../models/Super_Admin/Transaction.js";
 import SaaSPlan from "../../models/Super_Admin/SaaSPlan.js";
+import SubscriptionOrder from "../../models/Super_Admin/SubscriptionOrder.js";
 
 const getExpiryDate = (durationValue, durationUnit) => {
   const expiresAt = new Date();
@@ -118,26 +119,20 @@ export const loginRestaurant = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
+    /* 
+    Allow login even if subscription is expired or inactive. 
+    Frontend will redirect to SubscriptionExpired page if needed.
+    */
     const hasActiveSubscription =
       restaurant.subscription &&
       String(restaurant.subscription.status || "").toUpperCase() === "ACTIVE";
-    if (!hasActiveSubscription) {
-      return res.status(403).json({
-        success: false,
-        message: "No active plan found. Please purchase a plan to login.",
-      });
-    }
 
     const isExpired =
-      restaurant.subscription.expiresAt &&
+      restaurant.subscription?.expiresAt &&
       new Date(restaurant.subscription.expiresAt) < new Date();
-    if (isExpired) {
-      return res.status(403).json({
-        success: false,
-        message: "Your plan has expired. Please renew to continue.",
-      });
-    }
 
+    /* 
+    Remove strict transaction check to allow users to reach the renewal page.
     const successfulPayment = await Transaction.findOne({
       restaurantId: restaurant._id,
       status: "SUCCESS",
@@ -148,6 +143,7 @@ export const loginRestaurant = async (req, res) => {
         message: "Payment verification failed. Please complete payment to login.",
       });
     }
+    */
 
     return res.status(200).json({
       success: true,
@@ -166,5 +162,34 @@ export const loginRestaurant = async (req, res) => {
 };
 
 export const getRestaurantProfile = async (req, res) => {
-  return res.status(200).json({ success: true, restaurant: req.restaurant });
+  try {
+    const restaurant = req.restaurant;
+
+    // Data Repair: If subscription is missing, try to find the latest successful order
+    if (!restaurant.subscription || !restaurant.subscription.plan) {
+      const latestOrder = await SubscriptionOrder.findOne({
+        restaurantId: restaurant._id,
+        status: "SUCCESS",
+      })
+        .sort({ paidAt: -1 })
+        .populate("planId");
+
+      if (latestOrder) {
+        const plan = latestOrder.planId;
+        const subscription = {
+          plan: plan ? plan.name : "Premium Plan",
+          status: "ACTIVE",
+          expiresAt: latestOrder.expiresAt,
+        };
+        
+        // Update in-memory and database
+        restaurant.subscription = subscription;
+        await Restorent.findByIdAndUpdate(restaurant._id, { subscription });
+      }
+    }
+
+    return res.status(200).json({ success: true, restaurant });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };

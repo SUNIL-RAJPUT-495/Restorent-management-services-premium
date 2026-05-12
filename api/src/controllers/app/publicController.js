@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Product from '../../models/App_Restaurant/Product.js';
 import Table from '../../models/App_Restaurant/Table.js';
 import Order from '../../models/App_Restaurant/Order.js';
@@ -27,13 +28,14 @@ export const getRestaurantInfo = async (req, res) => {
     if (!settings) return res.status(404).json({ message: "Restaurant not found" });
     
     res.json({
-      restaurantName: settings.restaurantName,
-      logo: settings.logo,
-      address: settings.address,
-      contact: settings.contact,
+      restaurantName: settings.restaurantName || "Our Restaurant",
+      logo: settings.logo || "",
+      address: settings.location || "No address provided",
+      contact: settings.phone || "No contact info",
       currency: settings.currency || '₹',
       cgst: settings.cgst || 0,
-      sgst: settings.sgst || 0
+      sgst: settings.sgst || 0,
+      isSelfOrderEnabled: settings.isSelfOrderEnabled ?? true
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -46,7 +48,10 @@ export const getRestaurantInfo = async (req, res) => {
 export const getMenu = async (req, res) => {
   try {
     const { restId } = req.params;
-    const products = await Product.find({ restId, available: true });
+    const products = await Product.find({ 
+      restId: new mongoose.Types.ObjectId(restId), 
+      available: true 
+    });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -59,7 +64,9 @@ export const getMenu = async (req, res) => {
 export const getTables = async (req, res) => {
   try {
     const { restId } = req.params;
-    const tables = await Table.find({ restId });
+    const tables = await Table.find({ 
+      restId: new mongoose.Types.ObjectId(restId) 
+    });
     res.json(tables);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -220,15 +227,22 @@ export const createImbOrder = async (req, res) => {
 
     const cleanPhone = String(customerPhone).replace(/\D/g, "");
     
+    const settings = await Setting.findOne({ restId });
+    const finalToken = settings?.imbToken || process.env.IMB_CLIENT_SECRET;
+    
+    if (!finalToken) {
+      throw new Error("Payment gateway token not configured for this restaurant.");
+    }
+
     const payload = new URLSearchParams({
       customer_mobile: cleanPhone,
-      user_token: process.env.IMB_CLIENT_SECRET,
+      user_token: finalToken,
       amount: String(totalAmount),
       order_id: orderNumber,
       customer_name: customerName,
       remark1: customerEmail || 'Order',
       remark2: `Table ${tableNumber}`,
-      redirect_url: `${process.env.FRONTEND_URL}/order/status/${orderNumber}`,
+      redirect_url: `${process.env.FRONTEND_URL}/order/${restId}/status/${orderNumber}`,
     });
 
     const response = await axios.post(`${process.env.IMB_BASE_URL}api/create-order`, payload.toString(), {
@@ -282,12 +296,21 @@ export const verifyImbPayment = async (req, res) => {
       return res.status(200).json({ success: true, order });
     }
 
+    const settings = await Setting.findOne({ restId });
+    const finalToken = settings?.imbToken || process.env.IMB_CLIENT_SECRET;
+    const finalStatusUrl = settings?.imbStatusUrl || process.env.IMB_STATUS_URL;
+
+    if (!finalStatusUrl || !finalToken) {
+      console.error("IMB config missing for restId:", restId);
+      return res.status(503).json({ message: "Payment verification service not configured for this restaurant." });
+    }
+
     const statusPayload = new URLSearchParams({
-      user_token: process.env.IMB_CLIENT_SECRET,
+      user_token: finalToken,
       order_id: orderNumber
     });
 
-    const response = await axios.post(process.env.IMB_STATUS_URL, statusPayload.toString(), {
+    const response = await axios.post(finalStatusUrl, statusPayload.toString(), {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       timeout: 10000 // 10 second timeout
     });

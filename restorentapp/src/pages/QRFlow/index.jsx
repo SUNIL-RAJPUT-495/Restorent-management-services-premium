@@ -62,26 +62,38 @@ const QRLayout = () => {
                     </header>
 
                     <main>
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={step}
-                                initial="initial"
-                                animate="in"
-                                exit="out"
-                                variants={pageVariants}
-                                transition={pageTransition}
-                            >
-                                {step === 1 && <QRMenu />}
-                                {step === 2 && <QRCart />}
-                                {step === 3 && <QRTable />}
-                                {step === 4 && <QRPayment />}
-                                {step === 5 && <QRSuccess />}
-                                {step === 6 && <QRFeedback />}
-                            </motion.div>
-                        </AnimatePresence>
+                        {restaurantInfo?.isSelfOrderEnabled === false ? (
+                            <div className="flex flex-col items-center justify-center min-h-[70vh] p-8 text-center">
+                                <div className="w-20 h-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mb-4">
+                                    <ChefHat size={40} />
+                                </div>
+                                <h2 className="text-2xl font-black text-slate-900 mb-2 uppercase italic">Self-Ordering Disabled</h2>
+                                <p className="text-slate-500 max-w-xs mx-auto">
+                                    Sorry, self-ordering is currently unavailable at {restaurantInfo?.restaurantName}. Please contact our staff for assistance.
+                                </p>
+                            </div>
+                        ) : (
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={step}
+                                    initial="initial"
+                                    animate="in"
+                                    exit="out"
+                                    variants={pageVariants}
+                                    transition={pageTransition}
+                                >
+                                    {step === 1 && <QRMenu />}
+                                    {step === 2 && <QRCart />}
+                                    {step === 3 && <QRTable />}
+                                    {step === 4 && <QRPayment />}
+                                    {step === 5 && <QRSuccess />}
+                                    {step === 6 && <QRFeedback />}
+                                </motion.div>
+                            </AnimatePresence>
+                        )}
 
                         {/* Floating Cart Bar (Mobile) */}
-                        {step === 1 && cartCount > 0 && (
+                        {restaurantInfo?.isSelfOrderEnabled !== false && step === 1 && cartCount > 0 && (
                             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md z-50">
                                 <button
                                     onClick={() => setStep(2)}

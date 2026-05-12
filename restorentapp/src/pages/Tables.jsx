@@ -131,6 +131,10 @@ const Tables = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(["tables"]);
       setAddOpen(false);
+      toast.success("Table added successfully");
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Failed to add table");
     },
   });
 
@@ -229,7 +233,9 @@ const Tables = () => {
 
   const addTable = () => {
     const seats = parseInt(newSeats) || 4;
-    const nextNumber = tables.length > 0 ? Math.max(...tables.map((t) => parseInt(t.number))) + 1 : 1;
+    const nextNumber = tables.length > 0 
+      ? Math.max(...tables.map((t) => parseInt(t.number)).filter(n => !isNaN(n)), 0) + 1 
+      : 1;
     addTableMutation.mutate({ number: String(nextNumber), capacity: seats, status: "vacant" });
   };
 
@@ -319,7 +325,7 @@ const Tables = () => {
                   {String(t.number).padStart(2, "0")}
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  {t.seats} seats
+                  {t.capacity} seats
                 </p>
                 <div className={`mt-2 text-[11px] font-semibold ${meta.text}`}>
                   {meta.label}
@@ -376,7 +382,7 @@ const Tables = () => {
                   {(selected.status === 'vacant' || selected.status === 'free') && !isEditing && (
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => {
-                        setEditData({ number: selected.number, capacity: selected.capacity || selected.seats });
+                        setEditData({ number: selected.number, capacity: selected.capacity });
                         setIsEditing(true);
                       }}>
                         <Edit className="h-4 w-4" />
@@ -419,7 +425,7 @@ const Tables = () => {
               ) : (
               <div className="flex-1 overflow-y-auto no-scrollbar -mx-1 px-1">
                 <div className="grid gap-3 py-2 text-sm">
-                  <Row label="Capacity" value={`${selected.seats || selected.capacity} seats`} />
+                  <Row label="Capacity" value={`${selected.capacity} seats`} />
                   {(selected.guests > 0) && (
                     <Row label="Guests" value={String(selected.guests)} />
                   )}

@@ -40,7 +40,18 @@ export const addTable = async (req, res) => {
     const createdTable = await table.save();
     res.status(201).json(createdTable);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Table number already exists. Please use a different number." 
+      });
+    }
+    console.error("❌ Error adding table:", error);
+    res.status(400).json({ 
+      success: false, 
+      message: error.message,
+      error: error.errors 
+    });
   }
 };
 

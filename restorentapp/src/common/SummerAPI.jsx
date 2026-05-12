@@ -1,4 +1,4 @@
-export const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "https://restorent-management-services-premi-three.vercel.app");
+export const baseURL = "https://restorent-management-services-premi-three.vercel.app";
 
 const SummaryApi = {
    //app
@@ -7,7 +7,11 @@ const SummaryApi = {
     adminLogin: { url: baseURL + "/api/admin/login", method: "post" },
     purchasePlan: { url: baseURL + "/api/admin/purchase-plan", method: "post" },
     getMe: { url: baseURL + "/api/admin/me", method: "get" },
+    getProfile: { url: baseURL + "/api/admin/me", method: "get" },
     checkPlanAccess: { url: baseURL + "/api/admin/plan-access-check", method: "get" },
+    getAllSaasPlans: { url: baseURL + "/api/saas-plan/all-saas-plans", method: "get" },
+    createSubscriptionPayment: { url: baseURL + "/api/restaurant/payment/imb/create", method: "post" },
+    verifySubscriptionPayment: { url: baseURL + "/api/restaurant/payment/imb/verify", method: "post" },
 
     // Menu / Products
     getProducts:    { url: baseURL + "/api/products", method: "get"  },
@@ -36,8 +40,8 @@ const SummaryApi = {
     getSettings:    { url: baseURL + "/api/settings", method: "get" },
     updateSettings: { url: baseURL + "/api/settings", method: "put" },
     
-    // Public Feedback
-    submitFeedback: { url: baseURL + "/api/public/feedback", method: "post" }
+    // Public APIs (restId based)
+    submitFeedback: (restId) => ({ url: baseURL + `/api/public/${restId}/feedback`, method: "post" })
 }
 
 

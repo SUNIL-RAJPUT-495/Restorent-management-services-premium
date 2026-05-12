@@ -17,6 +17,8 @@ import { ProtectedAdminRoute } from "./utils/ProtectedAdminRoute";
 const QRBuilder = React.lazy(() => import("./pages/QRBuilder"));
 const QROrderFlow = React.lazy(() => import("./pages/QROrderFlow"));
 const SelfOrders = React.lazy(() => import("./pages/SelfOrders"));
+const SubscriptionExpired = React.lazy(() => import("./pages/SubscriptionExpired"));
+const ImbPaymentCallback = React.lazy(() => import("./pages/ImbPaymentCallback"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +50,9 @@ const App = () => (
           element={
             <ProtectedAdminRoute>
               <Routes>
+                  <Route path="/subscription-expired" element={<SubscriptionExpired />} />
+                  <Route path="/imb-payment" element={<ImbPaymentCallback />} />
+                  
                   <Route element={<AppLayout />}>
                     <Route path="/" element={<POS />} />
                     <Route path="/tables" element={<Tables />} />

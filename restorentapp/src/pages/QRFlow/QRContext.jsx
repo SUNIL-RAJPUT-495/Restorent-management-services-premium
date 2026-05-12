@@ -34,10 +34,6 @@ export const QRProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : {};
     });
 
-    useEffect(() => {
-        localStorage.setItem('qr_cart_data', JSON.stringify(cart));
-    }, [cart]);
-
     const [selectedTable, setSelectedTable] = useState(preSelectedTable || null);
     const [paymentMethod, setPaymentMethod] = useState('cash');
     const [orderConfirmed, setOrderConfirmed] = useState(() => {
@@ -46,9 +42,45 @@ export const QRProvider = ({ children }) => {
     });
     const [feedback, setFeedback] = useState({ rating: 0, comment: '' });
 
-    // React Query for API Data
+    useEffect(() => {
+        localStorage.setItem('qr_cart_data', JSON.stringify(cart));
+    }, [cart]);
+
+    // Handle scanning QR again after order
+    useEffect(() => {
+        // If visiting base URL (no order number in path) and we are on a post-order step
+        if (!urlOrderNumber && step >= 5) {
+            console.log("Returning to onboarding for new order...");
+            setStep(0); // Always show welcome screen for fresh scan
+            setOrderConfirmed(null);
+            setCart({});
+            localStorage.removeItem('qr_cart_data');
+            localStorage.removeItem('qr_last_order');
+            localStorage.removeItem('qr_current_step');
+        }
+    }, [urlOrderNumber]);
+
+    // Multi-tenant Reset: If restId changes, clear old restaurant data
+    useEffect(() => {
+        const savedRestId = localStorage.getItem('qr_current_rest_id');
+        if (savedRestId && savedRestId !== restId) {
+            console.log("Restaurant changed, resetting session...");
+            setCart({});
+            setOrderConfirmed(null);
+            localStorage.removeItem('qr_cart_data');
+            localStorage.removeItem('qr_last_order');
+            
+            setStep(0); // Always show onboarding on restaurant change
+            localStorage.removeItem('qr_current_step');
+        }
+        if (restId) {
+            localStorage.setItem('qr_current_rest_id', restId);
+        }
+    }, [restId, customerInfo.name, customerInfo.phone]);
+
+    const [isVerifying, setIsVerifying] = useState(false);
     const { data: menu = [], isLoading: isMenuLoading } = useQuery({
-        queryKey: ['publicMenu'],
+        queryKey: ['publicMenu', restId],
         queryFn: async () => {
             const res = await axios.get(`${baseURL}/api/public/${restId}/menu`);
             return Array.isArray(res.data) ? res.data : (res.data?.items || []);
@@ -57,7 +89,7 @@ export const QRProvider = ({ children }) => {
     });
 
     const { data: tables = [], isLoading: isTablesLoading } = useQuery({
-        queryKey: ['publicTables'],
+        queryKey: ['publicTables', restId],
         queryFn: async () => {
             const res = await axios.get(`${baseURL}/api/public/${restId}/tables`);
             return Array.isArray(res.data) ? res.data : [];
@@ -66,7 +98,7 @@ export const QRProvider = ({ children }) => {
     });
 
     const { data: restaurantInfo = { restaurantName: "Restaurant" }, isLoading: isInfoLoading } = useQuery({
-        queryKey: ['publicInfo'],
+        queryKey: ['publicInfo', restId],
         queryFn: async () => {
             try {
                 const res = await axios.get(`${baseURL}/api/public/${restId}/info`);
@@ -77,8 +109,6 @@ export const QRProvider = ({ children }) => {
         },
         staleTime: 10 * 60 * 1000,
     });
-
-    const [isVerifying, setIsVerifying] = useState(false);
 
     // Initial Payment Verification
     useEffect(() => {

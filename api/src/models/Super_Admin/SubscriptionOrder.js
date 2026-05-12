@@ -30,4 +30,4 @@ const subscriptionOrderSchema = new mongoose.Schema(
 
 subscriptionOrderSchema.index({ reservationId: 1, createdAt: -1 });
 
-export default mongoose.model("SubscriptionOrder", subscriptionOrderSchema);
+export default mongoose.models.SubscriptionOrder || mongoose.model("SubscriptionOrder", subscriptionOrderSchema);

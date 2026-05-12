@@ -48,6 +48,20 @@ const settingSchema = new mongoose.Schema({
     type: String,
     default: 'Thank you for dining with us!',
   },
+
+  // Payment Gateway Settings (IMB)
+  imbToken: {
+    type: String,
+    default: '',
+  },
+  imbStatusUrl: {
+    type: String,
+    default: '',
+  },
+  isSelfOrderEnabled: {
+    type: Boolean,
+    default: true,
+  },
 }, {
   timestamps: true,
 });

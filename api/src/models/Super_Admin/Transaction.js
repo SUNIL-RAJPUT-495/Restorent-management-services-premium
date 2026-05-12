@@ -3,8 +3,12 @@ import mongoose from 'mongoose';
 const transactionSchema = new mongoose.Schema({
   restaurantId: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Restaurant', 
+    ref: 'Restorent', 
     required: true 
+  },
+  orderId: {
+    type: String,
+    required: true,
   },
 
   planId: { 
@@ -29,8 +33,5 @@ const transactionSchema = new mongoose.Schema({
     default: 'SUCCESS' 
   }
 }, { timestamps: true });
-
-// Revenue calculation queries ke liye index
-transactionSchema.index({ status: 1, createdAt: -1 });
 
 export default mongoose.model('Transaction', transactionSchema);

@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import Restorent from "../models/Super_Admin/Restorent.js";
 import Transaction from "../models/Super_Admin/Transaction.js";
+import SubscriptionOrder from "../models/Super_Admin/SubscriptionOrder.js";
 
 export const protectRestaurant = async (req, res, next) => {
   try {
@@ -44,7 +45,12 @@ export const requireActivePlanAndPayment = async (req, res, next) => {
       status: "SUCCESS",
     });
 
-    if (!successfulPayment) {
+    const successfulSubOrder = await SubscriptionOrder.findOne({
+      restaurantId: restaurant._id,
+      status: "SUCCESS",
+    });
+
+    if (!successfulPayment && !successfulSubOrder) {
       return res.status(403).json({ success: false, message: "Payment not completed for current plan" });
     }
 

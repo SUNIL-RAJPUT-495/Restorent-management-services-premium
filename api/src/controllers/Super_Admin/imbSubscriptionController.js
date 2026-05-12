@@ -42,26 +42,63 @@ const buildImbPayload = ({ cleanPhone, amount, orderId, ownerName, email, redire
   });
 
 const createRestaurantFromReservation = async (reservation) => {
-  if (reservation.convertedRestaurantId) {
-    const existing = await Restorent.findById(reservation.convertedRestaurantId);
-    if (existing) return existing;
-  }
-
-  const existingByEmail = await Restorent.findOne({ email: reservation.email });
-  if (existingByEmail) return existingByEmail;
-
   const plan = await SaaSPlan.findById(reservation.planId);
   if (!plan) {
     throw new Error("Subscribed plan not found for reservation.");
   }
 
+  // Check if restaurant already exists
+  let restaurant = null;
+  if (reservation.convertedRestaurantId) {
+    restaurant = await Restorent.findById(reservation.convertedRestaurantId);
+  }
+
+  if (!restaurant) {
+    restaurant = await Restorent.findOne({ email: reservation.email });
+  }
+
+  if (restaurant) {
+    // RENEWAL LOGIC
+    const currentExpiry = restaurant.subscription?.expiresAt
+      ? new Date(restaurant.subscription.expiresAt)
+      : new Date();
+
+    // If expired, start from now. If active, add to current expiry.
+    const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
+
+    const newExpiresAt = new Date(baseDate);
+    if (plan.durationUnit === "days") {
+      newExpiresAt.setDate(newExpiresAt.getDate() + plan.durationValue);
+    } else if (plan.durationUnit === "months") {
+      newExpiresAt.setMonth(newExpiresAt.getMonth() + plan.durationValue);
+    } else if (plan.durationUnit === "years") {
+      newExpiresAt.setFullYear(newExpiresAt.getFullYear() + plan.durationValue);
+    }
+
+    restaurant.subscription = {
+      plan: plan.name,
+      status: "ACTIVE",
+      expiresAt: newExpiresAt,
+    };
+
+    await restaurant.save();
+
+    reservation.status = "CONVERTED";
+    reservation.lastPaymentStatus = "SUCCESS";
+    reservation.convertedRestaurantId = restaurant._id;
+    await reservation.save();
+
+    return restaurant;
+  }
+
+  // NEW REGISTRATION LOGIC
   const subscription = {
     plan: plan.name,
     status: plan.price === 0 ? "trial" : "active",
     expiresAt: computeSubscriptionExpiryDate(plan),
   };
 
-  const restaurant = await Restorent.create({
+  restaurant = await Restorent.create({
     name: reservation.name,
     email: reservation.email,
     phone: reservation.phone,

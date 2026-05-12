@@ -5,6 +5,7 @@ import connectDB from './src/config/db.js';
 import morgan from 'morgan';
 import http from 'http';
 import { Server } from "socket.io";
+import mongoose from 'mongoose';
 
 // super Admin 
 import superAdminRouter from './src/routes/Super_Admin/auth.Super.js';
@@ -53,11 +54,15 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(morgan('dev'));
 
+let httpServer;
+let io;
+let server;
+
 if (!isVercel) {
-  const httpServer = http.createServer(app);
-  const io = new Server(httpServer, {
+  httpServer = http.createServer(app);
+  io = new Server(httpServer, {
     cors: {
-      origin: ["https://restorent-management-eight.vercel.app", "https://restorent-management-services-premi.vercel.app"],
+      origin: ["http://localhost:5173", "http://localhost:8080", "https://restorent-management-eight.vercel.app", "https://restorent-management-services-premi.vercel.app"],
       methods: ["GET", "POST", "PUT", "DELETE"]
     }
   });
@@ -69,19 +74,6 @@ if (!isVercel) {
     socket.on('disconnect', () => {
       console.log('Client disconnected');
     });
-  });
-
-  const PORT = process.env.PORT || 5000;
-  const server = httpServer.listen(PORT, () => {
-    console.log(`Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  });
-
-  server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      process.exit(1);
-    } else {
-      throw err;
-    }
   });
 }
 
@@ -105,8 +97,59 @@ app.get('/', (req, res) => {
   res.send('Restaurant Management API is running');
 });
 
-connectDB().catch((error) => {
+connectDB().then(() => {
+  console.log('Database connected successfully');
+  
+  if (!isVercel && httpServer) {
+    const PORT = process.env.PORT || 5000;
+    let retries = 0;
+    const maxRetries = 2;
+
+    const startServer = () => {
+      server = httpServer.listen(PORT, () => {
+        console.log(`Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+      });
+
+      server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+          if (retries < maxRetries) {
+            retries++;
+            console.log(`⚠️ Port ${PORT} is busy, retrying in 2s... (Attempt ${retries}/${maxRetries})`);
+            setTimeout(startServer, 2000);
+          } else {
+            console.error(`❌ Port ${PORT} is still in use after retries. Please check for zombie processes.`);
+            setTimeout(() => process.exit(1), 1000);
+          }
+        } else {
+          console.error('Server error:', err);
+        }
+      });
+    };
+
+    startServer();
+  }
+}).catch((error) => {
   console.error('Database connection failed:', error.message);
+  if (!isVercel) process.exit(1);
 });
+
+// Graceful shutdown
+const gracefulShutdown = () => {
+  console.log('Shutting down gracefully...');
+  if (typeof server !== 'undefined') {
+    server.close(() => {
+      console.log('HTTP server closed');
+      mongoose.connection.close(false).then(() => {
+        console.log('MongoDB connection closed');
+        process.exit(0);
+      });
+    });
+  } else {
+    process.exit(0);
+  }
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
 
 export default app;
