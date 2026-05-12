@@ -25,33 +25,49 @@ export const protectRestaurant = async (req, res, next) => {
   }
 };
 
-export const requireActivePlanAndPayment = async (req, res, next) => {
+/**
+ * checkSubscriptionStatus — Verifies if the restaurant has an active/trial plan
+ * and if it hasn't expired.
+ */
+export const checkSubscriptionStatus = async (req, res, next) => {
   try {
     const restaurant = req.restaurant;
     if (!restaurant) {
       return res.status(401).json({ success: false, message: "Restaurant context missing" });
     }
 
-    if (!restaurant.subscription || restaurant.subscription.status.toUpperCase() !== "ACTIVE") {
-      return res.status(403).json({ success: false, message: "Active plan is required" });
+    const sub = restaurant.subscription;
+    if (!sub) {
+      return res.status(403).json({ success: false, message: "No subscription plan found. Please subscribe to continue." });
     }
 
-    if (restaurant.subscription.expiresAt && new Date(restaurant.subscription.expiresAt) < new Date()) {
-      return res.status(403).json({ success: false, message: "Plan expired. Please renew subscription" });
+    const status = String(sub.status || "").toUpperCase();
+    const isPremium = status === "ACTIVE" || status === "TRIAL";
+
+    if (!isPremium) {
+      return res.status(403).json({ success: false, message: "Subscription is inactive. Please activate your plan." });
     }
 
-    const successfulPayment = await Transaction.findOne({
-      restaurantId: restaurant._id,
-      status: "SUCCESS",
-    });
+    // Check expiration
+    if (sub.expiresAt && new Date(sub.expiresAt) < new Date()) {
+      return res.status(403).json({ success: false, message: "Your premium subscription has expired. Please renew." });
+    }
 
-    const successfulSubOrder = await SubscriptionOrder.findOne({
-      restaurantId: restaurant._id,
-      status: "SUCCESS",
-    });
+    // Strict payment check only for non-trial active plans
+    if (status === "ACTIVE") {
+      const successfulPayment = await Transaction.findOne({
+        restaurantId: restaurant._id,
+        status: "SUCCESS",
+      });
 
-    if (!successfulPayment && !successfulSubOrder) {
-      return res.status(403).json({ success: false, message: "Payment not completed for current plan" });
+      const successfulSubOrder = await SubscriptionOrder.findOne({
+        restaurantId: restaurant._id,
+        status: "SUCCESS",
+      });
+
+      if (!successfulPayment && !successfulSubOrder) {
+        return res.status(403).json({ success: false, message: "Payment verification failed. Please complete your payment." });
+      }
     }
 
     next();
