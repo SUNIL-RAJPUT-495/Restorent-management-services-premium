@@ -81,6 +81,14 @@ export const placeOrder = async (req, res) => {
     const { restId } = req.params;
     const { items, type, tableNumber, totalAmount, paymentMethod, guests, customerName, customerPhone, customerEmail } = req.body;
 
+    if (customerPhone) {
+      const cleanPhone = String(customerPhone).replace(/\D/g, "");
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ message: "Phone number must be exactly 10 digits" });
+      }
+    }
+
+
     const orderCount = await Order.countDocuments({ restId });
     const orderNumber = `ORD-${Date.now().toString().slice(-6)}-${orderCount + 1}`;
 
@@ -192,6 +200,14 @@ export const createImbOrder = async (req, res) => {
   try {
     const { restId } = req.params;
     const { items, type, tableNumber, totalAmount, guests, customerName, customerPhone, customerEmail } = req.body;
+
+    if (customerPhone) {
+      const cleanPhone = String(customerPhone).replace(/\D/g, "");
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ message: "Phone number must be exactly 10 digits" });
+      }
+    }
+
     
     const orderCount = await Order.countDocuments({ restId });
     const orderNumber = `ORD-${Date.now().toString().slice(-6)}-${orderCount + 1}`;
@@ -387,6 +403,14 @@ export const submitFeedback = async (req, res) => {
   try {
     const { restId } = req.params;
     const { orderNumber, rating, comment, customerName, customerPhone } = req.body;
+
+    if (customerPhone) {
+      const cleanPhone = String(customerPhone).replace(/\D/g, "");
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ message: "Phone number must be exactly 10 digits" });
+      }
+    }
+
     
     const feedback = new Feedback({
       restId,

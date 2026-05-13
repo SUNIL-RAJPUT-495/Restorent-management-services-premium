@@ -34,7 +34,7 @@ const QRTable = () => {
                         <button
                             key={table.number}
                         onClick={() => {
-                            if (isOccupied) {
+                            if (isOccupied && !isSelected) {
                                 toast.error("Table is already full");
                                 return;
                             }

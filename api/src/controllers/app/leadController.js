@@ -21,6 +21,14 @@ export const createLead = async (req, res) => {
       });
     }
 
+    const cleanPhone = String(phone).replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number must be exactly 10 digits",
+      });
+    }
+
     const lead = await Lead.create({
       name,
       email,

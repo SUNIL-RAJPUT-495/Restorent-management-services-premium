@@ -133,6 +133,11 @@ export const createSubscriptionReservation = async (req, res) => {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
+    const cleanPhone = String(phone).replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits" });
+    }
+
     const plan = await SaaSPlan.findById(planId);
     if (!plan || !plan.active) {
       return res.status(404).json({ success: false, message: "Selected plan not found or inactive" });

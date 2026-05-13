@@ -9,7 +9,8 @@ const QROnboarding = () => {
 
     const handleOnboarding = (e) => {
         e.preventDefault();
-        if (!customerInfo.name || !customerInfo.phone) return;
+        const cleanPhone = String(customerInfo.phone).replace(/\D/g, "");
+        if (cleanPhone.length !== 10) return;
         localStorage.setItem('qr_customer_info', JSON.stringify(customerInfo));
         setStep(1);
     };
@@ -45,8 +46,12 @@ const QROnboarding = () => {
                             type="tel"
                             required
                             value={customerInfo.phone}
-                            onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                            onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                setCustomerInfo({ ...customerInfo, phone: val });
+                            }}
                             placeholder="Phone Number"
+                            maxLength={10}
                             className="w-full px-6 py-4 rounded-2xl border border-white/10 bg-white/5 focus:bg-white/10 focus:border-accent/50 transition-all outline-none font-bold text-white placeholder:text-white/20 text-sm"
                         />
                         <button type="submit" className="w-full bg-accent text-white rounded-2xl py-4 font-black text-sm uppercase tracking-widest shadow-xl shadow-accent/20 hover:scale-[1.02] active:scale-95 transition-transform">

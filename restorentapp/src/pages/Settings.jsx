@@ -482,7 +482,11 @@ const Settings = () => {
                 <Input
                   placeholder="e.g. +91 98765 43210"
                   value={settingsData.phone}
-                  onChange={(e) => setSettingsData({ ...settingsData, phone: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                    setSettingsData({ ...settingsData, phone: val });
+                  }}
+                  maxLength={10}
                 />
               </div>
 

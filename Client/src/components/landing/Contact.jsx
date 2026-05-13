@@ -26,6 +26,13 @@ export const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    
+    const cleanPhone = String(formData.phone).replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -157,6 +164,8 @@ export const Contact = () => {
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-r-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
                     placeholder="10-digit number"
+                    pattern="[0-9]{10}"
+                    maxLength={10}
                     required
                   />
                 </div>

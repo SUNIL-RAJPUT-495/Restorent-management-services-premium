@@ -41,6 +41,11 @@ export const purchasePlanAndCreateRestaurant = async (req, res) => {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
+    const cleanPhone = String(phone).replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits" });
+    }
+
     const existingRestaurant = await Restorent.findOne({ email });
     if (existingRestaurant) {
       return res.status(400).json({ success: false, message: "Email already registered" });

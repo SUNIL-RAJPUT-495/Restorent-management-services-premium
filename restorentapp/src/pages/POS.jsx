@@ -435,7 +435,7 @@ const POS = () => {
                       <button
                         key={t._id}
                         onClick={() => {
-                          if (t.status === 'occupied') {
+                          if (t.status === 'occupied' && !isSelected) {
                             toast.error(`Table ${t.number} is occupied! All tables are full? Please wait.`);
                             return;
                           }
