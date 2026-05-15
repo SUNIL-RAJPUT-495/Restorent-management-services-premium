@@ -3,6 +3,16 @@ import axios from 'axios';
 import SummaryApi from '../../common/SummaryApi';
 import { CheckCircle2 } from 'lucide-react';
 
+const indianStates = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
+  "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", 
+  "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", 
+  "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", 
+  "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir", "Ladakh", 
+  "Lakshadweep", "Puducherry"
+];
+
 export const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -20,7 +30,13 @@ export const Contact = () => {
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    if (name === 'phone') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 10);
+      setFormData(prev => ({ ...prev, [name]: numericValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -132,10 +148,9 @@ export const Contact = () => {
                   required
                 >
                   <option value="" disabled>Select State</option>
-                  <option value="maharashtra">Maharashtra</option>
-                  <option value="delhi">Delhi</option>
-                  <option value="karnataka">Karnataka</option>
-                  <option value="gujarat">Gujarat</option>
+                  {indianStates.map(state => (
+                    <option key={state} value={state.toLowerCase()}>{state}</option>
+                  ))}
                 </select>
               </div>
               <div>

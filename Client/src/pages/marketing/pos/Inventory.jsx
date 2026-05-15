@@ -1,9 +1,15 @@
 import { Package, RefreshCw, PackageCheck, Soup, History, ClipboardCheck, MonitorSmartphone, CheckCircle2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { FeatureLayout } from '../../../components/landing/FeatureLayout';
 import inventoryImg from '../../../assets/pos/inventory.png';
 
 export const Inventory = () => {
+  const navigate = useNavigate();
+
+  const handleTrial = () => {
+    navigate('/pricing');
+  };
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -242,7 +248,7 @@ export const Inventory = () => {
                 </div>
               ))}
             </div>
-            <button className="mt-12 bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 mx-auto group">
+            <button onClick={handleTrial} className="mt-12 bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 mx-auto group">
               Start Your Free Trial
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>

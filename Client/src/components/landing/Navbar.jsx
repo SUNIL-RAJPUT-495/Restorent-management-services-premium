@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, Utensils, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -9,6 +10,10 @@ export const Navbar = () => {
   const [isPosDropdownOpen, setIsPosDropdownOpen] = useState(false);
   const [isMobilePosOpen, setIsMobilePosOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const handleTrial = () => {
+    navigate('/pricing');
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,10 +43,9 @@ export const Navbar = () => {
   ];
 
   return (
-    <header 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled || location.pathname !== '/' ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'
-      }`}
+    <header
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled || location.pathname !== '/' ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
@@ -58,27 +62,25 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex gap-6 items-center">
             {navLinks.map((link) => (
-              <div 
-                key={link.name} 
+              <div
+                key={link.name}
                 className="relative"
                 onMouseEnter={() => link.hasDropdown && setIsPosDropdownOpen(true)}
                 onMouseLeave={() => link.hasDropdown && setIsPosDropdownOpen(false)}
               >
                 {link.hasDropdown ? (
-                  <button 
-                    className={`flex items-center gap-1 font-medium transition-colors text-sm cursor-pointer ${
-                      location.pathname.startsWith(link.path) ? 'text-orange-500' : 'text-slate-600 hover:text-orange-500'
-                    }`}
+                  <button
+                    className={`flex items-center gap-1 font-medium transition-colors text-sm cursor-pointer ${location.pathname.startsWith(link.path) ? 'text-orange-500' : 'text-slate-600 hover:text-orange-500'
+                      }`}
                   >
                     {link.name}
                     <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isPosDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                 ) : (
-                  <Link 
-                    to={link.path} 
-                    className={`font-medium transition-colors text-sm ${
-                      location.pathname === link.path ? 'text-orange-500' : 'text-slate-600 hover:text-orange-500'
-                    }`}
+                  <Link
+                    to={link.path}
+                    className={`font-medium transition-colors text-sm ${location.pathname === link.path ? 'text-orange-500' : 'text-slate-600 hover:text-orange-500'
+                      }`}
                   >
                     {link.name}
                   </Link>
@@ -110,14 +112,14 @@ export const Navbar = () => {
               </div>
             ))}
             <div className="flex gap-3 ml-2">
-              <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-md shadow-orange-500/30">
+              <button onClick={handleTrial} className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-md shadow-orange-500/30">
                 Free Trial
               </button>
             </div>
           </nav>
 
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className="lg:hidden text-slate-900"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
@@ -129,7 +131,7 @@ export const Navbar = () => {
       {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -140,25 +142,24 @@ export const Navbar = () => {
                 <div key={link.name}>
                   {link.hasDropdown ? (
                     <>
-                      <button 
+                      <button
                         onClick={() => setIsMobilePosOpen(!isMobilePosOpen)}
-                        className={`flex items-center justify-between w-full font-medium p-2 rounded-lg ${
-                          location.pathname.startsWith(link.path) ? 'bg-orange-50 text-orange-500' : 'text-slate-600'
-                        }`}
+                        className={`flex items-center justify-between w-full font-medium p-2 rounded-lg ${location.pathname.startsWith(link.path) ? 'bg-orange-50 text-orange-500' : 'text-slate-600'
+                          }`}
                       >
                         {link.name}
                         <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isMobilePosOpen ? 'rotate-180' : ''}`} />
                       </button>
                       <AnimatePresence>
                         {isMobilePosOpen && (
-                          <motion.div 
+                          <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             className="ml-4 flex flex-col gap-1 mt-1 overflow-hidden"
                           >
                             {posSubLinks.map((sub) => (
-                              <Link 
+                              <Link
                                 key={sub.name}
                                 to={sub.path}
                                 onClick={() => setIsMobileMenuOpen(false)}
@@ -172,9 +173,9 @@ export const Navbar = () => {
                       </AnimatePresence>
                     </>
                   ) : (
-                    <Link 
-                      to={link.path} 
-                      onClick={() => setIsMobileMenuOpen(false)} 
+                    <Link
+                      to={link.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
                       className={`block font-medium p-2 rounded-lg ${location.pathname === link.path ? 'bg-orange-50 text-orange-500' : 'text-slate-600'}`}
                     >
                       {link.name}
@@ -183,7 +184,7 @@ export const Navbar = () => {
                 </div>
               ))}
               <hr className="border-slate-100 my-2" />
-              <button className="w-full bg-orange-500 text-white px-5 py-3 rounded-xl font-medium">
+              <button onClick={handleTrial} className="w-full bg-orange-500 text-white px-5 py-3 rounded-xl font-medium">
                 Start Free Trial
               </button>
             </div>

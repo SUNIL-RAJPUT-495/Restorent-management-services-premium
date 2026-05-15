@@ -3,6 +3,16 @@ import axios from "axios";
 import SummaryApi from "../../common/SummaryApi";
 import { X } from "lucide-react";
 
+const indianStates = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
+  "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", 
+  "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", 
+  "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", 
+  "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir", "Ladakh", 
+  "Lakshadweep", "Puducherry"
+];
+
 const LeadPopup = ({ open, onClose, onSubmitted }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -21,7 +31,13 @@ const LeadPopup = ({ open, onClose, onSubmitted }) => {
   if (!open) return null;
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    if (name === 'phone') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: numericValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -94,6 +110,7 @@ const LeadPopup = ({ open, onClose, onSubmitted }) => {
               required
               value={formData.phone}
               onChange={handleChange}
+              maxLength={10}
               placeholder="Phone Number *"
               className="w-full rounded-xl border border-slate-200 px-4 py-2.5 sm:py-3 text-sm outline-none focus:ring-2 focus:ring-orange-500 transition-all bg-slate-50/50"
             />
@@ -117,11 +134,9 @@ const LeadPopup = ({ open, onClose, onSubmitted }) => {
               className="w-full rounded-xl border border-slate-200 px-4 py-2.5 sm:py-3 text-sm outline-none focus:ring-2 focus:ring-orange-500 transition-all bg-white"
             >
               <option value="" disabled>Select State *</option>
-              <option value="maharashtra">Maharashtra</option>
-              <option value="delhi">Delhi</option>
-              <option value="karnataka">Karnataka</option>
-              <option value="gujarat">Gujarat</option>
-              <option value="other">Other</option>
+              {indianStates.map(state => (
+                <option key={state} value={state.toLowerCase()}>{state}</option>
+              ))}
             </select>
             <input
               type="text"

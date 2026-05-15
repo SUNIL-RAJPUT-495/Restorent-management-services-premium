@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Hero } from '../../components/landing/Hero';
 import { Stats } from '../../components/landing/Stats';
 import { Features } from '../../components/landing/Features';
@@ -44,6 +45,11 @@ const DetailedFeature = ({ title, description, image, reversed }) => (
 );
 
 export const Home = () => {
+  const navigate = useNavigate();
+
+  const handleTrial = () => {
+    navigate('/pricing');
+  };
   return (
     <div className="overflow-hidden">
       <Hero />
@@ -98,7 +104,7 @@ export const Home = () => {
             Join 500+ restaurants that are already growing with RestosoftIN. Start your 14-day free trial today.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <button className="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-full text-lg font-bold transition-all shadow-lg shadow-orange-500/30 hover:-translate-y-1">
+            <button onClick={handleTrial} className="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-full text-lg font-bold transition-all shadow-lg shadow-orange-500/30 hover:-translate-y-1">
               Get Started for Free
             </button>
             <button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-10 py-4 rounded-full text-lg font-bold transition-all backdrop-blur-sm">

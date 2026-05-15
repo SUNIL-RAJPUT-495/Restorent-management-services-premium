@@ -48,7 +48,13 @@ const RegisterRestaurant = () => {
   }
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'phone') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 10);
+      setFormData({ ...formData, [name]: numericValue });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -201,8 +207,9 @@ const RegisterRestaurant = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
+                        maxLength={10}
                         className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all"
-                        placeholder="+91 9876543210"
+                        placeholder="10-digit phone number"
                       />
                     </div>
                   </div>

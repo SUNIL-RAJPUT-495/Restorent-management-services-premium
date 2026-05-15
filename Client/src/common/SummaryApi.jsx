@@ -1,4 +1,4 @@
-export const baseURL = "https://restorent-management-services-premi-three.vercel.app";
+export const baseURL = "https://saas.api.bhukhabhukhi.com";
 
 const SummaryApi = {
     // SuperAdmin

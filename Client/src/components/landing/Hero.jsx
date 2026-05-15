@@ -1,8 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 export const Hero = () => {
+  const navigate = useNavigate();
+  const handleDemo = () => {
+    navigate('/contact');
+  }
+  const handleTrial = () => {
+    navigate('/pricing');
+  }
   return (
     <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
       {/* Background decoration */}
@@ -35,11 +44,11 @@ export const Hero = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-1">
+              <button onClick={handleTrial} className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-1">
                 Start 14-Day Free Trial
                 <ArrowRight className="w-5 h-5" />
               </button>
-              <button className="flex items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 px-8 py-4 rounded-full text-lg font-semibold transition-all hover:bg-slate-50">
+              <button onClick={handleDemo} className="flex items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 px-8 py-4 rounded-full text-lg font-semibold transition-all hover:bg-slate-50">
                 Book a Demo
               </button>
             </div>

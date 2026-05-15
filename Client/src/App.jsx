@@ -37,6 +37,11 @@ export const App = () => {
   const [showLeadPopup, setShowLeadPopup] = React.useState(false)
   const leadSubmittedKey = 'rw_lead_submitted'
 
+  // Scroll to top on route change
+  React.useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
+
   React.useEffect(() => {
     if (isAuthRoute || isSuperAdminRoute) return
     if (localStorage.getItem(leadSubmittedKey) === 'true') return
